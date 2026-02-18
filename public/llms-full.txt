@@ -1,0 +1,99 @@
+# CGIC — Staffing & Consulting (Full Documentation)
+
+> CGIC is a staffing and consulting company based in Brussels, Belgium.
+> Part of Alsena Group. We connect top talent with companies shaping tomorrow's world.
+
+## Company Overview
+
+CG International Consulting SRL (CGIC) is a Belgian staffing and consulting firm
+specializing in IT talent placement, strategic consulting, and digital transformation
+project management. We serve enterprise clients across Belgium and Europe with a
+focus on technology sector staffing.
+
+### Legal Information
+- **Legal Name**: CG International Consulting SRL
+- **Address**: 523 Avenue Louise, 1050 Brussels, Belgium
+- **LEI**: 875500UBAMWWIUVFT022
+- **DUNS**: 37-199-0796
+
+### Mission
+Connecting top talent with companies shaping tomorrow's world. We believe
+human capital is the engine of every success.
+
+### Values
+- **Excellence**: We strive for excellence in every assignment, placement, and advice
+- **Integrity**: Transparency and honesty at the heart of all interactions
+- **Innovation**: Adopting best practices and technologies to stay at the forefront
+
+## Services Detail
+
+### IT Staffing
+We identify and deploy the best technology profiles for critical projects.
+Our recruitment team screens candidates across all major technology stacks
+and delivers pre-vetted consultants within short timeframes.
+
+### Strategic Consulting
+Our senior consultants guide clients in defining and executing their strategy.
+We provide C-level advisory services, organizational design, and change
+management support.
+
+### Project Management
+End-to-end management of digital transformation projects. From scoping through
+delivery, our certified project managers ensure on-time, on-budget execution
+with clear governance frameworks.
+
+### Permanent Recruitment
+Finding talent who will become lasting members of your organization. Our
+permanent recruitment service covers executive search, mid-level placement,
+and specialized technology hiring.
+
+### Training & Coaching
+Custom development programs for teams. We design and deliver training
+curricula in leadership, technical skills, and organizational transformation.
+
+### Audit & Advisory
+In-depth assessment of processes and optimization recommendations. Our audit
+practice covers IT governance, security posture, and operational efficiency.
+
+## Company Facts
+
+- 150+ active consultants
+- 50+ enterprise clients
+- 12 years of experience
+- 98% client satisfaction rate
+- Available in French, English, and Dutch
+
+## Contact Information
+
+- **Email**: cedric.grauwels@cgic.be
+- **Phone**: +32 472 58 57 96
+- **Address**: 523 Avenue Louise, 1050 Brussels, Belgium
+- **Website**: https://www.cgic.be
+- **LEI**: 875500UBAMWWIUVFT022
+- **DUNS**: 37-199-0796
+
+## Sitemap
+
+### French (Default)
+- https://www.cgic.be/fr — Accueil
+- https://www.cgic.be/fr/about — À propos
+- https://www.cgic.be/fr/services — Services
+- https://www.cgic.be/fr/contact — Contact
+- https://www.cgic.be/fr/legal/privacy — Politique de confidentialité
+- https://www.cgic.be/fr/legal/terms — Conditions générales
+
+### English
+- https://www.cgic.be/en — Home
+- https://www.cgic.be/en/about — About
+- https://www.cgic.be/en/services — Services
+- https://www.cgic.be/en/contact — Contact
+- https://www.cgic.be/en/legal/privacy — Privacy Policy
+- https://www.cgic.be/en/legal/terms — Terms & Conditions
+
+### Dutch
+- https://www.cgic.be/nl — Home
+- https://www.cgic.be/nl/about — Over ons
+- https://www.cgic.be/nl/services — Diensten
+- https://www.cgic.be/nl/contact — Contact
+- https://www.cgic.be/nl/legal/privacy — Privacybeleid
+- https://www.cgic.be/nl/legal/terms — Algemene voorwaarden

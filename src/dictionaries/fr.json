@@ -1,0 +1,116 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "about": "À propos",
+    "services": "Services",
+    "contact": "Contact"
+  },
+  "hero": {
+    "title": "Votre partenaire stratégique en staffing & consulting",
+    "subtitle": "CGIC accompagne les entreprises dans leur transformation en leur apportant les talents et l'expertise dont elles ont besoin.",
+    "cta": "Contactez-nous"
+  },
+  "about": {
+    "sectionTitle": "À propos de CGIC",
+    "previewTitle": "Une expertise au service de votre croissance",
+    "previewText": "Depuis notre création, CGIC s'engage à fournir des solutions de staffing et de consulting de premier ordre. Notre approche personnalisée garantit un accompagnement sur mesure pour chaque client.",
+    "learnMore": "En savoir plus",
+    "missionTitle": "Notre mission",
+    "missionText": "Connecter les meilleurs talents aux entreprises qui façonnent le monde de demain. Nous croyons que le capital humain est le moteur de toute réussite.",
+    "valuesTitle": "Nos valeurs",
+    "value1Title": "Excellence",
+    "value1Text": "Nous visons l'excellence dans chaque mission, chaque placement, chaque conseil.",
+    "value2Title": "Intégrité",
+    "value2Text": "La transparence et l'honnêteté sont au cœur de toutes nos interactions.",
+    "value3Title": "Innovation",
+    "value3Text": "Nous adoptons les meilleures pratiques et technologies pour rester à la pointe.",
+    "teamTitle": "Notre équipe",
+    "teamText": "Une équipe de professionnels passionnés, dédiés à votre succès."
+  },
+  "services": {
+    "sectionTitle": "Nos services",
+    "subtitle": "Des solutions adaptées à vos besoins",
+    "service1Title": "Staffing IT",
+    "service1Text": "Nous identifions et déployons les meilleurs profils technologiques pour vos projets critiques.",
+    "service2Title": "Consulting stratégique",
+    "service2Text": "Nos consultants seniors vous accompagnent dans la définition et l'exécution de votre stratégie.",
+    "service3Title": "Gestion de projet",
+    "service3Text": "Pilotage de bout en bout de vos projets de transformation digitale.",
+    "service4Title": "Recrutement permanent",
+    "service4Text": "Trouvez les talents qui intégreront durablement votre organisation.",
+    "service5Title": "Formation & coaching",
+    "service5Text": "Programmes de développement sur mesure pour vos équipes.",
+    "service6Title": "Audit & conseil",
+    "service6Text": "Évaluation approfondie de vos processus et recommandations d'optimisation."
+  },
+  "clients": {
+    "title": "Ils nous font confiance",
+    "subtitle": "Des entreprises leaders dans leur secteur"
+  },
+  "cta": {
+    "title": "Prêt à transformer votre entreprise ?",
+    "subtitle": "Discutons de vos besoins et trouvons ensemble la solution idéale.",
+    "button": "Prendre contact"
+  },
+  "contact": {
+    "pageTitle": "Contactez-nous",
+    "pageSubtitle": "Notre équipe est à votre écoute pour répondre à vos besoins.",
+    "formTitle": "Envoyez-nous un message",
+    "nameLabel": "Nom complet",
+    "namePlaceholder": "Votre nom",
+    "emailLabel": "Email",
+    "emailPlaceholder": "votre@email.com",
+    "companyLabel": "Entreprise",
+    "companyPlaceholder": "Nom de votre entreprise",
+    "phoneLabel": "Téléphone",
+    "phonePlaceholder": "+32 ...",
+    "messageLabel": "Message",
+    "messagePlaceholder": "Décrivez votre besoin...",
+    "submit": "Envoyer",
+    "sending": "Envoi en cours...",
+    "successTitle": "Message envoyé !",
+    "successText": "Nous vous recontacterons dans les plus brefs délais.",
+    "errorRequired": "Ce champ est requis",
+    "errorEmail": "Email invalide",
+    "infoTitle": "Nos coordonnées",
+    "address": "523 Avenue Louise, 1050 Bruxelles, Belgique",
+    "email": "cedric.grauwels@cgic.be",
+    "phone": "+32 472 58 57 96"
+  },
+  "footer": {
+    "description": "CG International Consulting SRL — Votre partenaire de confiance en staffing et consulting, basé à Bruxelles.",
+    "companyName": "CG International Consulting SRL",
+    "addressLine": "523 Avenue Louise, 1050 Bruxelles — Belgique",
+    "lei": "LEI : 875500UBAMWWIUVFT022",
+    "duns": "DUNS : 37-199-0796",
+    "navigation": "Navigation",
+    "contactTitle": "Contact",
+    "legalTitle": "Légal",
+    "privacy": "Politique de confidentialité",
+    "terms": "Conditions générales",
+    "copyright": "© {year} CG International Consulting SRL. Tous droits réservés."
+  },
+  "legal": {
+    "privacyTitle": "Politique de confidentialité",
+    "privacyContent": "Contenu de la politique de confidentialité à venir.",
+    "termsTitle": "Conditions générales",
+    "termsContent": "Contenu des conditions générales à venir.",
+    "companyInfo": "CG International Consulting SRL",
+    "registeredAddress": "523 Avenue Louise, 1050 Bruxelles — Belgique",
+    "lei": "Legal Entity Identifier (LEI) : 875500UBAMWWIUVFT022",
+    "duns": "Dun and Bradstreet (DUNS) : 37-199-0796",
+    "lastUpdated": "Dernière mise à jour : {date}"
+  },
+  "metadata": {
+    "homeTitle": "CGIC — Staffing & Consulting",
+    "homeDescription": "CGIC, votre partenaire stratégique en staffing et consulting à Bruxelles. Expertise IT, gestion de projet et recrutement.",
+    "aboutTitle": "À propos — CGIC",
+    "aboutDescription": "Découvrez CGIC, notre mission, nos valeurs et notre équipe dédiée au staffing et consulting d'excellence.",
+    "servicesTitle": "Services — CGIC",
+    "servicesDescription": "Staffing IT, consulting stratégique, gestion de projet et recrutement. Découvrez nos solutions sur mesure.",
+    "contactTitle": "Contact — CGIC",
+    "contactDescription": "Contactez CGIC pour discuter de vos besoins en staffing et consulting. Notre équipe est à votre écoute.",
+    "privacyTitle": "Politique de confidentialité — CGIC",
+    "termsTitle": "Conditions générales — CGIC"
+  }
+}

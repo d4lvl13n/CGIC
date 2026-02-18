@@ -1,0 +1,40 @@
+# CGIC — Staffing & Consulting
+
+> CGIC is a staffing and consulting company based in Brussels, Belgium.
+> We connect top talent with companies shaping tomorrow's world.
+
+## Company Information
+
+- **Name**: CGIC (CG International Consulting SRL)
+- **Website**: https://www.cgic.be
+- **Industry**: Staffing & Consulting
+- **Location**: 523 Avenue Louise, 1050 Brussels, Belgium
+- **Languages**: French, English, Dutch
+- **LEI**: 875500UBAMWWIUVFT022
+- **DUNS**: 37-199-0796
+
+## Services
+
+- IT Staffing: Identifying and deploying top technology profiles for critical projects
+- Strategic Consulting: Senior consultants guiding strategy definition and execution
+- Project Management: End-to-end digital transformation project management
+- Permanent Recruitment: Finding lasting talent for organizations
+- Training & Coaching: Custom development programs for teams
+- Audit & Advisory: In-depth process assessment and optimization recommendations
+
+## Contact
+
+- Email: cedric.grauwels@cgic.be
+- Phone: +32 472 58 57 96
+- Address: 523 Avenue Louise, 1050 Brussels, Belgium
+
+## Pages
+
+- Home: https://www.cgic.be/fr
+- About: https://www.cgic.be/fr/about
+- Services: https://www.cgic.be/fr/services
+- Contact: https://www.cgic.be/fr/contact
+
+## Documentation
+
+- Full details: https://www.cgic.be/llms-full.txt
