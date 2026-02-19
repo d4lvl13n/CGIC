@@ -43,8 +43,8 @@ export function Header() {
     >
       <div className="mx-auto flex max-w-[1400px] items-center justify-between px-6 py-5 lg:px-12">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-3 text-xl font-bold tracking-[0.2em] text-white uppercase">
-          <Image src="/img/logo.png" alt="CGIC" width={36} height={36} className="rounded-full" />
+        <Link href="/" className="flex items-center gap-3 text-xl font-bold tracking-[0.08em] text-white uppercase">
+          <Image src="/img/logo.png" alt="CGIC" width={41} height={41} className="rounded-full" />
           CGIC
         </Link>
 

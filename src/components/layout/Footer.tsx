@@ -17,8 +17,8 @@ export function Footer() {
           {/* Company info */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-3">
-              <Image src="/img/logo.png" alt="CGIC" width={32} height={32} className="rounded-full" />
-              <h3 className="text-xl font-bold tracking-[0.2em] uppercase">CGIC</h3>
+              <Image src="/img/logo.png" alt="CGIC" width={37} height={37} className="rounded-full" />
+              <h3 className="text-xl font-bold tracking-[0.08em] uppercase">CGIC</h3>
             </div>
             <p className="mt-4 text-sm font-medium text-white/80">{t("companyName")}</p>
             <p className="mt-4 text-sm leading-relaxed text-white/60">
