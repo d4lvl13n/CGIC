@@ -23,7 +23,7 @@ export function ClientLogos() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center text-sm font-medium uppercase tracking-[0.2em] text-gray-400"
+          className="text-center text-sm font-medium uppercase tracking-[0.2em] text-gray-500"
         >
           {t("title")}
         </motion.p>
@@ -38,7 +38,7 @@ export function ClientLogos() {
           {placeholderLogos.map((name) => (
             <div
               key={name}
-              className="text-xl font-semibold tracking-wide text-gray-300 transition-colors hover:text-navy-950"
+              className="text-xl font-semibold tracking-wide text-gray-400 transition-colors hover:text-navy-950"
             >
               {name}
             </div>

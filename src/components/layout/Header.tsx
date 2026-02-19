@@ -6,6 +6,7 @@ import { Link, usePathname } from "@/i18n/navigation";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 
 const navLinks = [
   { href: "/about", key: "about" },
@@ -42,7 +43,8 @@ export function Header() {
     >
       <div className="mx-auto flex max-w-[1400px] items-center justify-between px-6 py-5 lg:px-12">
         {/* Logo */}
-        <Link href="/" className="text-xl font-bold tracking-[0.2em] text-white uppercase">
+        <Link href="/" className="flex items-center gap-3 text-xl font-bold tracking-[0.2em] text-white uppercase">
+          <Image src="/img/logo.png" alt="CGIC" width={36} height={36} className="rounded-full" />
           CGIC
         </Link>
 
@@ -56,7 +58,7 @@ export function Header() {
                 "relative text-[15px] font-normal tracking-wide transition-colors",
                 pathname === link.href
                   ? "text-white"
-                  : "text-white/70 hover:text-white"
+                  : "text-white/80 hover:text-white"
               )}
             >
               {t(link.key)}
@@ -114,7 +116,7 @@ export function Header() {
                     "py-3 text-lg font-light tracking-wide transition-colors",
                     pathname === link.href
                       ? "text-white"
-                      : "text-white/60 hover:text-white"
+                      : "text-white/80 hover:text-white"
                   )}
                 >
                   {t(link.key)}

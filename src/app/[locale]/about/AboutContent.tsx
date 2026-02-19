@@ -115,7 +115,7 @@ export function AboutContent() {
                 <h3 className="mt-6 text-2xl font-bold text-white">
                   {t(`${key}Title`)}
                 </h3>
-                <p className="mt-4 text-[15px] leading-relaxed text-white/50">
+                <p className="mt-4 text-[15px] leading-relaxed text-white/70">
                   {t(`${key}Text`)}
                 </p>
               </motion.div>
@@ -184,7 +184,7 @@ export function AboutContent() {
                 <div className="text-4xl font-bold text-navy-950 sm:text-5xl">
                   {stat.value}
                 </div>
-                <div className="mt-2 text-sm uppercase tracking-[0.15em] text-gray-400">
+                <div className="mt-2 text-sm uppercase tracking-[0.15em] text-gray-500">
                   {stat.label}
                 </div>
               </motion.div>

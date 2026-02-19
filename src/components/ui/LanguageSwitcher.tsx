@@ -30,7 +30,7 @@ export function LanguageSwitcher() {
             "px-2 py-1 text-sm font-medium rounded transition-colors cursor-pointer",
             loc === locale
               ? "bg-white/20 text-white"
-              : "text-white/60 hover:text-white"
+              : "text-white/80 hover:text-white"
           )}
         >
           {localeLabels[loc]}

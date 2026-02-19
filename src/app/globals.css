@@ -1,17 +1,17 @@
 @import "tailwindcss";
 
 @theme {
-  /* Navy palette — GE Aerospace-inspired */
-  --color-navy-950: #00003d;
-  --color-navy-900: #000850;
-  --color-navy-800: #001070;
-  --color-navy-700: #0a1a8a;
-  --color-navy-600: #1a2fa0;
+  /* Blue palette — matched to CGIC logo gradient */
+  --color-navy-950: #0A2463;
+  --color-navy-900: #0E3285;
+  --color-navy-800: #1545A8;
+  --color-navy-700: #1E5EC8;
+  --color-navy-600: #2878E8;
 
-  /* Accent */
-  --color-accent: #0066ff;
-  --color-accent-light: #3388ff;
-  --color-accent-dark: #0050cc;
+  /* Accent — logo bright blue */
+  --color-accent: #22AAFF;
+  --color-accent-light: #55BFFF;
+  --color-accent-dark: #1A8FDD;
 
   /* Neutrals */
   --color-gray-100: #f5f5f7;

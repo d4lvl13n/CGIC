@@ -30,7 +30,7 @@ export function CTABanner() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.6, delay: 0.15 }}
-            className="mt-6 max-w-xl text-lg text-white/50"
+            className="mt-6 max-w-xl text-lg text-white/70"
           >
             {t("subtitle")}
           </motion.p>

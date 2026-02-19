@@ -23,7 +23,7 @@ export function AboutPreview() {
             <h2 className="mt-4 text-4xl font-bold leading-tight tracking-tight text-navy-950 sm:text-5xl lg:text-6xl">
               {t("previewTitle")}
             </h2>
-            <p className="mt-8 text-lg leading-relaxed text-gray-400">
+            <p className="mt-8 text-lg leading-relaxed text-gray-500">
               {t("previewText")}
             </p>
             <div className="mt-10">

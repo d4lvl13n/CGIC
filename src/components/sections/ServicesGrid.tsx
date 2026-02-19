@@ -57,7 +57,7 @@ export function ServicesGrid() {
               <h3 className="mt-6 text-xl font-semibold text-white">
                 {t(`${key}Title`)}
               </h3>
-              <p className="mt-3 text-[15px] leading-relaxed text-white/50">
+              <p className="mt-3 text-[15px] leading-relaxed text-white/70">
                 {t(`${key}Text`)}
               </p>
             </motion.div>

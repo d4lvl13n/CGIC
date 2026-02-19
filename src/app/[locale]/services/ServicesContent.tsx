@@ -99,7 +99,7 @@ export function ServicesContent() {
 
                 {/* Description */}
                 <div className="md:col-span-6">
-                  <p className="text-lg leading-relaxed text-gray-400">
+                  <p className="text-lg leading-relaxed text-gray-500">
                     {t(`${key}Text`)}
                   </p>
                 </div>
@@ -130,7 +130,7 @@ export function ServicesContent() {
                 <div className="text-4xl font-bold text-white sm:text-5xl">
                   {stat.value}
                 </div>
-                <div className="mt-2 text-sm uppercase tracking-[0.15em] text-white/40">
+                <div className="mt-2 text-sm uppercase tracking-[0.15em] text-white/70">
                   {stat.label}
                 </div>
               </motion.div>
