@@ -72,11 +72,6 @@ export function Footer() {
                   {contact("email")}
                 </a>
               </li>
-              <li>
-                <a href={`tel:${contact("phone")}`} className="transition-colors hover:text-white">
-                  {contact("phone")}
-                </a>
-              </li>
             </ul>
           </div>
 

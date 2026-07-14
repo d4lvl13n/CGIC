@@ -27,8 +27,7 @@ export function OrganizationJsonLd() {
     contactPoint: [
       {
         "@type": "ContactPoint",
-        telephone: "+32-472-58-57-96",
-        email: "cedric.grauwels@cgic.be",
+        email: "info@cgic.be",
         contactType: "customer service",
         availableLanguage: ["French", "English", "Dutch"],
         areaServed: ["BE", "EU"],
@@ -111,8 +110,7 @@ export function LocalBusinessJsonLd() {
     "@id": `${baseUrl}/#localbusiness`,
     name: "CGIC",
     url: baseUrl,
-    telephone: "+32-472-58-57-96",
-    email: "cedric.grauwels@cgic.be",
+    email: "info@cgic.be",
     address: {
       "@type": "PostalAddress",
       streetAddress: "523 Avenue Louise",
