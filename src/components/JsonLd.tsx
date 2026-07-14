@@ -18,8 +18,8 @@ export function OrganizationJsonLd() {
     duns: "37-199-0796",
     address: {
       "@type": "PostalAddress",
-      streetAddress: "523 Avenue Louise",
-      postalCode: "1050",
+      streetAddress: "35 Square de Meeûs",
+      postalCode: "1000",
       addressLocality: "Brussels",
       addressRegion: "Brussels-Capital",
       addressCountry: "BE",
@@ -113,16 +113,16 @@ export function LocalBusinessJsonLd() {
     email: "info@cgic.be",
     address: {
       "@type": "PostalAddress",
-      streetAddress: "523 Avenue Louise",
-      postalCode: "1050",
+      streetAddress: "35 Square de Meeûs",
+      postalCode: "1000",
       addressLocality: "Brussels",
       addressRegion: "Brussels-Capital",
       addressCountry: "BE",
     },
     geo: {
       "@type": "GeoCoordinates",
-      latitude: 50.8503,
-      longitude: 4.3517,
+      latitude: 50.8394,
+      longitude: 4.3668,
     },
     openingHoursSpecification: {
       "@type": "OpeningHoursSpecification",
@@ -133,7 +133,7 @@ export function LocalBusinessJsonLd() {
     priceRange: "$$",
     areaServed: {
       "@type": "GeoCircle",
-      geoMidpoint: { "@type": "GeoCoordinates", latitude: 50.8503, longitude: 4.3517 },
+      geoMidpoint: { "@type": "GeoCoordinates", latitude: 50.8394, longitude: 4.3668 },
       geoRadius: "500000",
     },
     parentOrganization: { "@id": `${baseUrl}/#organization` },

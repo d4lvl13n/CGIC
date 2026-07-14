@@ -60,8 +60,8 @@ export const metadata: Metadata = {
   other: {
     "geo.region": "BE-BRU",
     "geo.placename": "Brussels",
-    "geo.position": "50.8503;4.3517",
-    "ICBM": "50.8503, 4.3517",
+    "geo.position": "50.8394;4.3668",
+    "ICBM": "50.8394, 4.3668",
   },
 };
 

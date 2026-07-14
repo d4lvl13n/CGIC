@@ -73,13 +73,13 @@
     "errorRequired": "Ce champ est requis",
     "errorEmail": "Email invalide",
     "infoTitle": "Nos coordonnées",
-    "address": "523 Avenue Louise, 1050 Bruxelles, Belgique",
+    "address": "35 Square de Meeûs, 1000 Bruxelles, Belgique",
     "email": "info@cgic.be"
   },
   "footer": {
     "description": "CG International Consulting SRL — Votre partenaire de confiance en staffing et consulting, basé à Bruxelles.",
     "companyName": "CG International Consulting SRL",
-    "addressLine": "523 Avenue Louise, 1050 Bruxelles — Belgique",
+    "addressLine": "35 Square de Meeûs, 1000 Bruxelles — Belgique",
     "lei": "LEI : 875500UBAMWWIUVFT022",
     "duns": "DUNS : 37-199-0796",
     "navigation": "Navigation",
@@ -95,7 +95,7 @@
     "termsTitle": "Conditions générales",
     "termsContent": "Contenu des conditions générales à venir.",
     "companyInfo": "CG International Consulting SRL",
-    "registeredAddress": "523 Avenue Louise, 1050 Bruxelles — Belgique",
+    "registeredAddress": "35 Square de Meeûs, 1000 Bruxelles — Belgique",
     "lei": "Legal Entity Identifier (LEI) : 875500UBAMWWIUVFT022",
     "duns": "Dun and Bradstreet (DUNS) : 37-199-0796",
     "lastUpdated": "Dernière mise à jour : {date}"
