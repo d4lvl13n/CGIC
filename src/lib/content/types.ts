@@ -24,6 +24,7 @@ export type JobState = "open" | "closed";
 
 export type Job = {
   id: number;
+  recruitCrmSlug?: string;
   reference: string;
   locale: Locale;
   slug: string;
@@ -45,7 +46,7 @@ export type Job = {
   skills: TaxonomyValue[];
   publishedAt: string;
   startDate?: string;
-  closingDate: string;
+  closingDate?: string;
   state: JobState;
   featured: boolean;
   applicationUrl: string;

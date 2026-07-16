@@ -117,7 +117,7 @@ type JobPostingProps = {
   description: string;
   reference: string;
   publishedAt: string;
-  closingDate: string;
+  closingDate?: string;
   contractSlug: string;
   location: {
     label: string;
@@ -156,7 +156,7 @@ export function JobPostingJsonLd(props: JobPostingProps) {
     employmentType: employmentTypeMap[props.contractSlug] ?? "OTHER",
     hiringOrganization: { "@id": `${baseUrl}/#organization` },
     url: props.url,
-    directApply: false,
+    directApply: true,
     ...(remote ? {
       jobLocationType: "TELECOMMUTE",
       applicantLocationRequirements: props.applicantCountries?.map((country) => ({

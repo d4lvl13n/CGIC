@@ -38,7 +38,7 @@ export function JobCard({ job, locale, labels }: { job: Job; locale: Locale; lab
           <span>{job.location.label}</span>
           <span>{job.contractType.label}</span>
           <span>{job.workMode.label}</span>
-          <span className="text-gray-400">{labels.closing} {formatDate(job.closingDate, locale)}</span>
+          {job.closingDate && <span className="text-gray-400">{labels.closing} {formatDate(job.closingDate, locale)}</span>}
         </div>
       </div>
 

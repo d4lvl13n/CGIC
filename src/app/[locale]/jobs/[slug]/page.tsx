@@ -5,11 +5,14 @@ import { Link } from "@/i18n/navigation";
 import { CmsHtml } from "@/components/content/CmsHtml";
 import { BreadcrumbJsonLd, JobPostingJsonLd } from "@/components/JsonLd";
 import { JobCard } from "@/components/jobs/JobCard";
+import { JobApplicationForm } from "@/components/jobs/JobApplicationForm";
 import { getJobBySlug, getJobs, isJobActive, type Locale } from "@/lib/content";
 import { formatDate } from "@/lib/format";
 import { baseUrl, getOpenGraph } from "@/lib/seo";
 
 type PageProps = { params: Promise<{ locale: Locale; slug: string }> };
+
+export const revalidate = 300;
 
 function jobAlternates(job: NonNullable<Awaited<ReturnType<typeof getJobBySlug>>>) {
   const languages: Record<string, string> = {};
@@ -48,8 +51,6 @@ export default async function JobDetailPage({ params }: PageProps) {
   const active = isJobActive(job);
   const related = (await getJobs(locale)).filter((candidate) => candidate.id !== job.id && (candidate.expertise.slug === job.expertise.slug || candidate.location.slug === job.location.slug)).slice(0, 3);
   const publicUrl = `${baseUrl}/${locale}/jobs/${job.slug}`;
-  const applicationIsExternal = /^https?:\/\//.test(job.applicationUrl);
-
   return (
     <>
       <BreadcrumbJsonLd items={[
@@ -60,7 +61,7 @@ export default async function JobDetailPage({ params }: PageProps) {
       {active && (
         <JobPostingJsonLd
           title={job.title}
-          description={`${job.summary} ${job.responsibilitiesHtml}`}
+          description={job.responsibilitiesHtml}
           reference={job.reference}
           publishedAt={job.publishedAt}
           closingDate={job.closingDate}
@@ -95,7 +96,7 @@ export default async function JobDetailPage({ params }: PageProps) {
                 [t("location"), job.location.label],
                 [t("contractType"), job.contractType.label],
                 [t("workMode"), job.workMode.label],
-                [t("closing"), formatDate(job.closingDate, locale)],
+                ...(job.closingDate ? [[t("closing"), formatDate(job.closingDate, locale)]] : []),
               ].map(([label, value]) => <div key={label}><dt className="text-xs uppercase tracking-[0.14em] text-white/35">{label}</dt><dd className="mt-1.5 font-medium text-white">{value}</dd></div>)}
             </dl>
           </div>
@@ -114,8 +115,8 @@ export default async function JobDetailPage({ params }: PageProps) {
       <section className="bg-white py-24 sm:py-32">
         <div className="mx-auto grid max-w-[1400px] gap-16 px-6 lg:grid-cols-[1fr_330px] lg:px-12">
           <div className="space-y-20">
-            <div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent-dark">01</p><h2 className="mt-3 text-3xl font-bold tracking-tight text-navy-950 sm:text-4xl">{t("responsibilities")}</h2><CmsHtml html={job.responsibilitiesHtml} className="mt-8" /></div>
-            <div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent-dark">02</p><h2 className="mt-3 text-3xl font-bold tracking-tight text-navy-950 sm:text-4xl">{t("candidateProfile")}</h2><CmsHtml html={job.candidateProfileHtml} className="mt-8" /></div>
+            <div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent-dark">01</p><h2 className="mt-3 text-3xl font-bold tracking-tight text-navy-950 sm:text-4xl">{t("description")}</h2><CmsHtml html={job.responsibilitiesHtml} className="mt-8" /></div>
+            {job.candidateProfileHtml && <div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent-dark">02</p><h2 className="mt-3 text-3xl font-bold tracking-tight text-navy-950 sm:text-4xl">{t("candidateProfile")}</h2><CmsHtml html={job.candidateProfileHtml} className="mt-8" /></div>}
             {job.offerHtml && <div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent-dark">03</p><h2 className="mt-3 text-3xl font-bold tracking-tight text-navy-950 sm:text-4xl">{t("offer")}</h2><CmsHtml html={job.offerHtml} className="mt-8" /></div>}
           </div>
 
@@ -127,11 +128,34 @@ export default async function JobDetailPage({ params }: PageProps) {
                 {job.startDate && <div><dt className="text-xs uppercase tracking-[0.14em] text-gray-400">{t("startDate")}</dt><dd className="mt-1 font-semibold text-navy-950">{formatDate(job.startDate, locale)}</dd></div>}
                 <div><dt className="text-xs uppercase tracking-[0.14em] text-gray-400">{t("skills")}</dt><dd className="mt-2 flex flex-wrap gap-2">{job.skills.map((skill) => <span key={skill.slug} className="bg-white px-2.5 py-1 text-xs text-gray-600">{skill.label}</span>)}</dd></div>
               </dl>
-              {active && <><a href={job.applicationUrl} target={applicationIsExternal ? "_blank" : undefined} rel={applicationIsExternal ? "noopener noreferrer" : undefined} className="mt-8 flex w-full items-center justify-between bg-navy-950 px-5 py-4 font-semibold text-white transition-colors hover:bg-navy-800"><span>{t("apply")}</span><svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a><p className="mt-4 text-xs leading-relaxed text-gray-500">{t("applyNote")}</p></>}
+              {active && <><a href="#apply" className="mt-8 flex w-full items-center justify-between bg-navy-950 px-5 py-4 font-semibold text-white transition-colors hover:bg-navy-800"><span>{t("apply")}</span><svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a><p className="mt-4 text-xs leading-relaxed text-gray-500">{t("applyNote")}</p></>}
             </div>
           </aside>
         </div>
       </section>
+
+      {active && (
+        <section id="apply" className="scroll-mt-24 bg-white pb-24 sm:pb-32" aria-labelledby="application-title">
+          <div className="mx-auto max-w-[1400px] px-6 lg:px-12">
+            <div className="grid overflow-hidden border border-navy-950/10 lg:grid-cols-[0.72fr_1.28fr]">
+              <div className="relative overflow-hidden bg-navy-950 p-8 text-white sm:p-12">
+                <div className="absolute -bottom-28 -left-24 h-80 w-80 rounded-full border border-white/10" aria-hidden="true" />
+                <div className="relative">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-light">{t("application.eyebrow")}</p>
+                  <h2 id="application-title" className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">{t("application.title")}</h2>
+                  <p className="mt-6 text-lg leading-relaxed text-white/65">{t("application.intro", { role: job.title })}</p>
+                  <ol className="mt-10 space-y-5 text-sm text-white/70">
+                    {[t("application.stepProfile"), t("application.stepReview"), t("application.stepRecruiter")].map((step, index) => (
+                      <li key={step} className="flex gap-4"><span className="font-semibold text-accent-light">0{index + 1}</span><span>{step}</span></li>
+                    ))}
+                  </ol>
+                </div>
+              </div>
+              <JobApplicationForm job={job} locale={locale} />
+            </div>
+          </div>
+        </section>
+      )}
 
       {related.length > 0 && (
         <section className="bg-gray-100 py-24 sm:py-32">

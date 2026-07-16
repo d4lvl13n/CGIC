@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getAllArticles } from "@/lib/content";
+import { getAllArticles, getJobs } from "@/lib/content";
 
 const baseUrl = "https://www.cgic.be";
 const locales = ["fr", "en", "nl"] as const;
@@ -48,9 +48,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const content = await Promise.all(locales.map(async (locale) => ({
     locale,
     articles: await getAllArticles(locale),
+    jobs: await getJobs(locale),
   })));
 
-  for (const { locale, articles } of content) {
+  for (const { locale, articles, jobs } of content) {
+    for (const job of jobs) {
+      const languages = Object.fromEntries(Object.entries(job.alternates).map(([lang, slug]) => [lang, `${baseUrl}/${lang}/jobs/${slug}`]));
+      if (job.alternates.fr) languages["x-default"] = `${baseUrl}/fr/jobs/${job.alternates.fr}`;
+      entries.push({
+        url: `${baseUrl}/${locale}/jobs/${job.slug}`,
+        lastModified: new Date(job.publishedAt),
+        changeFrequency: "daily",
+        priority: 0.8,
+        alternates: Object.keys(languages).length ? { languages } : undefined,
+      });
+    }
+
     for (const article of articles) {
       const languages = Object.fromEntries(Object.entries(article.alternates).map(([lang, slug]) => [lang, `${baseUrl}/${lang}/insights/${slug}`]));
       if (article.alternates.fr) languages["x-default"] = `${baseUrl}/fr/insights/${article.alternates.fr}`;

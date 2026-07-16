@@ -1,6 +1,10 @@
+import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 import { getAlternates, getOpenGraph } from "@/lib/seo";
-import { RecruitCrmJobsEmbed } from "@/components/jobs/RecruitCrmJobsEmbed";
+import { JobsExplorer } from "@/components/jobs/JobsExplorer";
+import { getJobs, type Locale } from "@/lib/content";
+
+export const revalidate = 300;
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -18,7 +22,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
 export default async function JobsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "jobs" });
+  const [t, jobs] = await Promise.all([
+    getTranslations({ locale, namespace: "jobs" }),
+    getJobs(locale as Locale),
+  ]);
 
   return (
     <>
@@ -39,29 +46,16 @@ export default async function JobsPage({ params }: { params: Promise<{ locale: s
             </div>
             <div className="border-l border-white/15 pl-6 lg:pb-2">
               <p className="text-lg leading-relaxed text-white/65">{t("subtitle")}</p>
-              <a
-                href="https://recruitcrm.io/jobs/Alsena_Ltd_jobs"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-accent-light transition-colors hover:text-white"
-              >
-                {t("openExternally")}
-                <span aria-hidden="true">&#8599;</span>
-              </a>
+              <p className="mt-8 text-xs font-semibold uppercase tracking-[0.18em] text-accent-light">{t("nativeExperience")}</p>
             </div>
           </div>
         </div>
         <div className="h-1 bg-gradient-to-r from-accent via-accent-light to-transparent" />
       </section>
 
-      <RecruitCrmJobsEmbed
-        title={t("embedTitle")}
-        openExternallyLabel={t("openExternally")}
-        externalNote={t("externalNote")}
-        expandLabel={t("expand")}
-        closeLabel={t("close")}
-        mobileLaunchLabel={t("mobileLaunch")}
-      />
+      <Suspense fallback={<div className="min-h-[520px] bg-white" />}>
+        <JobsExplorer jobs={jobs} locale={locale as Locale} />
+      </Suspense>
     </>
   );
 }
