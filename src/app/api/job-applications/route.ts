@@ -37,11 +37,14 @@ export async function POST(request: Request) {
   const job = await getJobBySlug(parsed.data.locale as Locale, parsed.data.jobSlug);
   if (!job || !job.recruitCrmSlug || !isJobActive(job)) return error("JOB_NOT_AVAILABLE", 404);
 
+  let recruitCrmStage = "candidate_lookup";
   try {
     let candidate = await findRecruitCrmCandidateByEmail(parsed.data.email);
     if (candidate) {
+      recruitCrmStage = "resume_attachment";
       await attachRecruitCrmCandidateFile(candidate.slug, resume.file);
     } else {
+      recruitCrmStage = "candidate_creation";
       candidate = await createRecruitCrmCandidate({
         firstName: parsed.data.firstName,
         lastName: parsed.data.lastName,
@@ -56,6 +59,7 @@ export async function POST(request: Request) {
       });
     }
 
+    recruitCrmStage = "job_application";
     const application = await applyRecruitCrmCandidate(candidate.slug, job.recruitCrmSlug);
 
     // Optional sidecar only: RecruitCRM is the application system of record.
@@ -75,7 +79,7 @@ export async function POST(request: Request) {
       application: { status: application.alreadyApplied ? "already_applied" : "applied" },
     });
   } catch (cause) {
-    console.error("RecruitCRM application failed", cause);
+    console.error("RecruitCRM application failed", { stage: recruitCrmStage, cause });
     return error("RECRUITCRM_SUBMISSION_FAILED", 502);
   }
 }

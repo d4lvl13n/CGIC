@@ -72,9 +72,19 @@ export const recruitCrmCandidateSchema = z.object({
   email: z.string().nullish(),
 }).passthrough();
 
-export const recruitCrmCandidateSearchResponseSchema = z.object({
-  data: z.array(recruitCrmCandidateSchema),
-}).passthrough();
+const recruitCrmCandidateListSchema = z.array(recruitCrmCandidateSchema);
+
+export const recruitCrmCandidateSearchResponseSchema = z.union([
+  recruitCrmCandidateListSchema,
+  z.object({ data: recruitCrmCandidateListSchema }).passthrough(),
+]);
+
+export const recruitCrmCandidateCreateResponseSchema = z.union([
+  recruitCrmCandidateSchema,
+  recruitCrmCandidateListSchema,
+  z.object({ data: recruitCrmCandidateSchema }).passthrough(),
+  z.object({ data: recruitCrmCandidateListSchema }).passthrough(),
+]);
 
 export type RecruitCrmJob = z.infer<typeof recruitCrmJobSchema>;
 export type RecruitCrmPublicJob = z.infer<typeof recruitCrmPublicJobSchema>;

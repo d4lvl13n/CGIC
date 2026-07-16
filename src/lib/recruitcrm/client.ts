@@ -2,6 +2,7 @@ import "server-only";
 
 import {
   recruitCrmCandidateSchema,
+  recruitCrmCandidateCreateResponseSchema,
   recruitCrmCandidateSearchResponseSchema,
   recruitCrmPublicJobsResponseSchema,
   type RecruitCrmJob,
@@ -110,7 +111,9 @@ export async function listRecruitCrmJobs(): Promise<RecruitCrmJob[]> {
 export async function findRecruitCrmCandidateByEmail(email: string) {
   const query = new URLSearchParams({ email, exact_search: "true" });
   const response = await recruitCrmFetch(`/v1/candidates/search?${query}`, { cache: "no-store" });
-  return recruitCrmCandidateSearchResponseSchema.parse(await response.json()).data[0] ?? null;
+  const payload = recruitCrmCandidateSearchResponseSchema.parse(await response.json());
+  const candidates = Array.isArray(payload) ? payload : payload.data;
+  return candidates[0] ?? null;
 }
 
 type CandidateInput = {
@@ -145,7 +148,18 @@ export async function createRecruitCrmCandidate(input: CandidateInput) {
     body: form,
     cache: "no-store",
   });
-  return recruitCrmCandidateSchema.parse(await response.json());
+  const payload = recruitCrmCandidateCreateResponseSchema.parse(await response.json());
+  if (Array.isArray(payload)) {
+    const candidate = payload[0];
+    if (!candidate) throw new RecruitCrmApiError("RecruitCRM returned no candidate after creation", 502, payload);
+    return candidate;
+  }
+  if ("data" in payload) {
+    const candidate = Array.isArray(payload.data) ? payload.data[0] : payload.data;
+    if (!candidate) throw new RecruitCrmApiError("RecruitCRM returned no candidate after creation", 502, payload);
+    return candidate;
+  }
+  return recruitCrmCandidateSchema.parse(payload);
 }
 
 export async function attachRecruitCrmCandidateFile(candidateSlug: string, resume: File) {

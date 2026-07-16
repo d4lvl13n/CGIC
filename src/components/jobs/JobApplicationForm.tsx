@@ -6,18 +6,48 @@ import { Link } from "@/i18n/navigation";
 import type { Job, Locale } from "@/lib/content";
 import { MAX_RESUME_BYTES } from "@/lib/applications/schema";
 
-type SubmissionState = "idle" | "submitting" | "success" | "error";
+type SubmissionState = "idle" | "uploading" | "processing" | "success" | "error";
+
+type ApplicationResponse = { error?: { code?: string } } | null;
+
+function submitApplication(
+  data: FormData,
+  onProgress: (progress: number) => void,
+  onUploaded: () => void,
+) {
+  return new Promise<{ status: number; body: ApplicationResponse }>((resolve, reject) => {
+    const request = new XMLHttpRequest();
+    request.open("POST", "/api/job-applications");
+    request.responseType = "json";
+    request.upload.addEventListener("progress", (event) => {
+      if (event.lengthComputable) onProgress(Math.round((event.loaded / event.total) * 100));
+    });
+    request.upload.addEventListener("load", onUploaded);
+    request.addEventListener("load", () => resolve({ status: request.status, body: request.response as ApplicationResponse }));
+    request.addEventListener("error", () => reject(new Error("NETWORK_ERROR")));
+    request.addEventListener("abort", () => reject(new Error("REQUEST_ABORTED")));
+    request.send(data);
+  });
+}
+
+function formatFileSize(size: number) {
+  return `${(size / 1024 / 1024).toFixed(1)} MB`;
+}
 
 export function JobApplicationForm({ job, locale }: { job: Job; locale: Locale }) {
   const t = useTranslations("jobs.application");
   const formRef = useRef<HTMLFormElement>(null);
   const [state, setState] = useState<SubmissionState>("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const isSubmitting = state === "uploading" || state === "processing";
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setState("submitting");
+    setState("uploading");
     setErrorMessage("");
+    setUploadProgress(0);
 
     const data = new FormData(event.currentTarget);
     const resume = data.get("resume");
@@ -38,15 +68,22 @@ export function JobApplicationForm({ job, locale }: { job: Job; locale: Locale }
     }
 
     try {
-      const response = await fetch("/api/job-applications", { method: "POST", body: data });
-      const result = await response.json().catch(() => null) as { error?: { code?: string } } | null;
-      if (!response.ok) {
-        const code = result?.error?.code;
+      const response = await submitApplication(
+        data,
+        setUploadProgress,
+        () => {
+          setUploadProgress(100);
+          setState("processing");
+        },
+      );
+      if (response.status < 200 || response.status >= 300) {
+        const code = response.body?.error?.code;
         if (code === "JOB_NOT_AVAILABLE") throw new Error(t("errors.jobUnavailable"));
         if (code === "INTEGRATION_NOT_CONFIGURED") throw new Error(t("errors.notConfigured"));
         throw new Error(t("errors.generic"));
       }
       setState("success");
+      setSelectedFile(null);
       formRef.current?.reset();
     } catch (cause) {
       setState("error");
@@ -77,7 +114,7 @@ export function JobApplicationForm({ job, locale }: { job: Job; locale: Locale }
   const labelClass = "text-xs font-semibold uppercase tracking-[0.14em] text-navy-950";
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="bg-gray-100 p-6 sm:p-10 lg:p-12" noValidate={false}>
+    <form ref={formRef} onSubmit={handleSubmit} className="bg-gray-100 p-6 sm:p-10 lg:p-12" noValidate={false} aria-busy={isSubmitting}>
       <input type="hidden" name="jobSlug" value={job.slug} />
       <input type="hidden" name="locale" value={locale} />
       <div className="absolute -left-[9999px]" aria-hidden="true">
@@ -149,12 +186,33 @@ export function JobApplicationForm({ job, locale }: { job: Job; locale: Locale }
         </div>
         <div className="sm:col-span-2">
           <label htmlFor="application-resume" className={labelClass}>{t("resume")}</label>
-          <label htmlFor="application-resume" className="mt-2 flex cursor-pointer items-center gap-5 border border-dashed border-navy-950/25 bg-white p-5 transition-colors hover:border-accent">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-navy-950 text-white">
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M12 16V4m0 0L7 9m5-5 5 5M5 14v5h14v-5" /></svg>
+          <label htmlFor="application-resume" className={`mt-2 flex cursor-pointer items-center gap-5 border border-dashed bg-white p-5 transition-colors hover:border-accent ${selectedFile ? "border-accent" : "border-navy-950/25"}`}>
+            <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white ${selectedFile ? "bg-accent" : "bg-navy-950"}`}>
+              {selectedFile ? (
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>
+              ) : (
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M12 16V4m0 0L7 9m5-5 5 5M5 14v5h14v-5" /></svg>
+              )}
             </span>
-            <span><span className="block text-sm font-semibold text-navy-950">{t("resumeAction")}</span><span className="mt-1 block text-xs text-gray-500">{t("resumeHint")}</span></span>
-            <input id="application-resume" name="resume" type="file" accept="application/pdf,.pdf" required className="sr-only" />
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-semibold text-navy-950">{selectedFile?.name ?? t("resumeAction")}</span>
+              <span className="mt-1 block text-xs text-gray-500">{selectedFile ? t("resumeSelected", { size: formatFileSize(selectedFile.size) }) : t("resumeHint")}</span>
+            </span>
+            <input
+              id="application-resume"
+              name="resume"
+              type="file"
+              accept="application/pdf,.pdf"
+              required
+              disabled={isSubmitting}
+              className="sr-only"
+              onChange={(event) => {
+                const file = event.currentTarget.files?.[0] ?? null;
+                setSelectedFile(file);
+                setErrorMessage("");
+                setState("idle");
+              }}
+            />
           </label>
         </div>
       </div>
@@ -166,9 +224,29 @@ export function JobApplicationForm({ job, locale }: { job: Job; locale: Locale }
 
       {state === "error" && <p className="mt-6 border-l-4 border-red-500 bg-red-50 p-4 text-sm text-red-700" role="alert">{errorMessage}</p>}
 
-      <button type="submit" disabled={state === "submitting"} className="mt-8 inline-flex min-h-14 w-full items-center justify-between bg-navy-950 px-6 font-semibold text-white transition-colors hover:bg-navy-800 disabled:cursor-wait disabled:opacity-60 sm:w-auto sm:min-w-64">
-        <span>{state === "submitting" ? t("submitting") : t("submit")}</span>
-        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+      {isSubmitting && (
+        <div className="mt-6 border border-accent/30 bg-white p-4" role="status" aria-live="polite">
+          <div className="flex items-center justify-between gap-4 text-sm">
+            <span className="font-semibold text-navy-950">{state === "uploading" ? t("uploading") : t("processing")}</span>
+            <span className="tabular-nums text-gray-500">{state === "uploading" ? `${uploadProgress}%` : t("uploaded")}</span>
+          </div>
+          <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-gray-200">
+            <div
+              className={`h-full rounded-full bg-accent transition-[width] duration-300 ${state === "processing" ? "animate-pulse" : ""}`}
+              style={{ width: `${state === "processing" ? 100 : uploadProgress}%` }}
+            />
+          </div>
+          <p className="mt-3 text-xs leading-relaxed text-gray-500">{state === "uploading" ? t("uploadingHint") : t("processingHint")}</p>
+        </div>
+      )}
+
+      <button type="submit" disabled={isSubmitting} className="mt-8 inline-flex min-h-14 w-full items-center justify-between bg-navy-950 px-6 font-semibold text-white transition-colors hover:bg-navy-800 disabled:cursor-wait disabled:opacity-60 sm:w-auto sm:min-w-64">
+        <span>{state === "uploading" ? t("uploadingButton", { progress: uploadProgress }) : state === "processing" ? t("processingButton") : t("submit")}</span>
+        {isSubmitting ? (
+          <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" aria-hidden="true" />
+        ) : (
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+        )}
       </button>
     </form>
   );
