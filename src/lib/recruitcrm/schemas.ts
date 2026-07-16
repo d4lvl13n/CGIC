@@ -86,5 +86,29 @@ export const recruitCrmCandidateCreateResponseSchema = z.union([
   z.object({ data: recruitCrmCandidateListSchema }).passthrough(),
 ]);
 
+export const recruitCrmCandidateJobAssociationSchema = z.object({
+  candidate_slug: idSchema,
+  job_slug: idSchema,
+  status: z.object({
+    status_id: z.union([z.string(), z.number()]).optional(),
+    label: z.string().optional(),
+  }).passthrough().nullish(),
+}).passthrough();
+
+const recruitCrmCandidateJobAssociationListSchema = z.array(
+  recruitCrmCandidateJobAssociationSchema,
+).min(1);
+
+export const recruitCrmCandidateJobAssociationResponseSchema = z.union([
+  recruitCrmCandidateJobAssociationSchema,
+  recruitCrmCandidateJobAssociationListSchema,
+  z.object({ data: recruitCrmCandidateJobAssociationSchema }).passthrough(),
+  z.object({ data: recruitCrmCandidateJobAssociationListSchema }).passthrough(),
+]).transform((payload) => {
+  if (Array.isArray(payload)) return payload[0];
+  if ("data" in payload) return Array.isArray(payload.data) ? payload.data[0] : payload.data;
+  return payload;
+});
+
 export type RecruitCrmJob = z.infer<typeof recruitCrmJobSchema>;
 export type RecruitCrmPublicJob = z.infer<typeof recruitCrmPublicJobSchema>;

@@ -3,6 +3,7 @@ import "server-only";
 import {
   recruitCrmCandidateSchema,
   recruitCrmCandidateCreateResponseSchema,
+  recruitCrmCandidateJobAssociationResponseSchema,
   recruitCrmCandidateSearchResponseSchema,
   recruitCrmPublicJobsResponseSchema,
   type RecruitCrmJob,
@@ -176,24 +177,61 @@ export async function attachRecruitCrmCandidateFile(candidateSlug: string, resum
   });
 }
 
-async function hasRecruitCrmApplication(candidateSlug: string, jobSlug: string) {
+function matchesRecruitCrmApplication(
+  application: { candidate_slug: string; job_slug: string },
+  candidateSlug: string,
+  jobSlug: string,
+) {
+  return application.candidate_slug === candidateSlug && application.job_slug === jobSlug;
+}
+
+async function getRecruitCrmApplication(candidateSlug: string, jobSlug: string) {
   const response = await recruitCrmFetch(
     `/v1/candidates/${encodeURIComponent(candidateSlug)}/hiring-stages/${encodeURIComponent(jobSlug)}`,
     { cache: "no-store" },
     [404, 422],
   );
-  return response.ok;
+  if (!response.ok) return null;
+
+  const payload: unknown = await response.json();
+  const application = recruitCrmCandidateJobAssociationResponseSchema.parse(payload);
+  if (!matchesRecruitCrmApplication(application, candidateSlug, jobSlug)) {
+    throw new RecruitCrmApiError(
+      "RecruitCRM returned an unexpected candidate/job association",
+      502,
+      payload,
+    );
+  }
+  return application;
 }
 
 export async function applyRecruitCrmCandidate(candidateSlug: string, jobSlug: string) {
-  if (await hasRecruitCrmApplication(candidateSlug, jobSlug)) {
+  if (await getRecruitCrmApplication(candidateSlug, jobSlug)) {
     return { alreadyApplied: true };
   }
 
   const query = new URLSearchParams({ job_slug: jobSlug });
-  await recruitCrmFetch(
-    `/v1/candidates/${encodeURIComponent(candidateSlug)}/apply?${query}`,
+  const response = await recruitCrmFetch(
+    `/v1/candidates/${encodeURIComponent(candidateSlug)}/assign?${query}`,
     { method: "POST", cache: "no-store" },
   );
+
+  const payload: unknown = await response.json();
+  const application = recruitCrmCandidateJobAssociationResponseSchema.parse(payload);
+  if (!matchesRecruitCrmApplication(application, candidateSlug, jobSlug)) {
+    throw new RecruitCrmApiError(
+      "RecruitCRM did not confirm the requested candidate/job assignment",
+      502,
+      payload,
+    );
+  }
+
+  if (!(await getRecruitCrmApplication(candidateSlug, jobSlug))) {
+    throw new RecruitCrmApiError(
+      "RecruitCRM assignment could not be verified",
+      502,
+      { candidateSlug, jobSlug },
+    );
+  }
   return { alreadyApplied: false };
 }
