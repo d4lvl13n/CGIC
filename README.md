@@ -28,6 +28,7 @@ Required for live jobs and applications:
 
 - `RECRUITCRM_API_TOKEN`: private RecruitCRM bearer token.
 - `RECRUITCRM_API_URL`: defaults to `https://api.recruitcrm.io`.
+- `RECRUITCRM_JOBS_PAGE`: public RecruitCRM board identifier; defaults to `Alsena_Ltd_jobs`.
 
 Optional internal sidecar:
 

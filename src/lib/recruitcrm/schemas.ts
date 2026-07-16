@@ -43,6 +43,30 @@ export const recruitCrmJobsResponseSchema = z.object({
   data: z.array(recruitCrmJobSchema),
 }).passthrough();
 
+const recruitCrmPublicJobSchema = z.object({
+  slug: idSchema,
+  srno: z.union([z.string(), z.number()]).nullish(),
+  name: z.string().min(1),
+  companyname: z.string().nullish(),
+  jobcode: z.string().nullish(),
+  description: z.string().nullish(),
+  details: z.unknown().optional(),
+  detailfilename: z.string().nullish(),
+  city: z.string().nullish(),
+  locality: z.string().nullish(),
+  jdtext: z.string().nullish(),
+  remote: z.union([z.string(), z.number(), z.boolean()]).nullish(),
+  postalcode: z.string().nullish(),
+}).passthrough();
+
+export const recruitCrmPublicJobsResponseSchema = z.object({
+  status: z.string(),
+  message: z.string().optional(),
+  data: z.object({
+    jobs: z.array(recruitCrmPublicJobSchema),
+  }).optional(),
+}).passthrough();
+
 export const recruitCrmCandidateSchema = z.object({
   slug: idSchema,
   email: z.string().nullish(),
@@ -53,3 +77,4 @@ export const recruitCrmCandidateSearchResponseSchema = z.object({
 }).passthrough();
 
 export type RecruitCrmJob = z.infer<typeof recruitCrmJobSchema>;
+export type RecruitCrmPublicJob = z.infer<typeof recruitCrmPublicJobSchema>;

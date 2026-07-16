@@ -3,11 +3,14 @@ import "server-only";
 import {
   recruitCrmCandidateSchema,
   recruitCrmCandidateSearchResponseSchema,
-  recruitCrmJobsResponseSchema,
+  recruitCrmPublicJobsResponseSchema,
   type RecruitCrmJob,
+  type RecruitCrmPublicJob,
 } from "./schemas";
 
 const DEFAULT_API_URL = "https://api.recruitcrm.io";
+const PUBLIC_JOBS_API_URL = "https://albatross.recruitcrm.io/v1/external-pages/jobs-by-account/get";
+const DEFAULT_JOBS_PAGE = "Alsena_Ltd_jobs";
 
 export class RecruitCrmApiError extends Error {
   constructor(
@@ -64,11 +67,44 @@ async function recruitCrmFetch(
   return response;
 }
 
+function normalizePublicJob(job: RecruitCrmPublicJob): RecruitCrmJob {
+  return {
+    id: job.srno ?? job.slug,
+    name: job.name,
+    slug: job.slug,
+    note_for_candidates: job.description,
+    job_status: { id: 1, label: "Open" },
+    city: job.city,
+    locality: job.locality,
+    postal_code: job.postalcode,
+    enable_job_application_form: 1,
+    job_code: job.jobcode,
+    job_description_text: job.jdtext || job.description,
+    job_location_type: job.remote === true || job.remote === 1 || job.remote === "1" ? 1 : 0,
+    job_posting_status: 1,
+  };
+}
+
 export async function listRecruitCrmJobs(): Promise<RecruitCrmJob[]> {
-  const response = await recruitCrmFetch("/v1/jobs?limit=100&sort_by=updatedon&sort_order=desc", {
+  const jobsPage = process.env.RECRUITCRM_JOBS_PAGE?.trim() || DEFAULT_JOBS_PAGE;
+  const query = new URLSearchParams({ account: jobsPage, batch: "true" });
+  const response = await fetch(`${PUBLIC_JOBS_API_URL}?${query}`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      Origin: "https://recruitcrm.io",
+    },
+    body: JSON.stringify({ limit: 100, offset: 0, search_data: "", onlyJobs: true }),
     next: { revalidate: 300, tags: ["recruitcrm-jobs"] },
   });
-  return recruitCrmJobsResponseSchema.parse(await response.json()).data;
+  if (!response.ok) throw new RecruitCrmApiError("RecruitCRM public jobs request failed", response.status);
+
+  const payload = recruitCrmPublicJobsResponseSchema.parse(await response.json());
+  if (payload.status !== "success" || !payload.data) {
+    throw new RecruitCrmApiError(payload.message || "RecruitCRM public jobs request failed", 502, payload);
+  }
+  return payload.data.jobs.map(normalizePublicJob);
 }
 
 export async function findRecruitCrmCandidateByEmail(email: string) {
