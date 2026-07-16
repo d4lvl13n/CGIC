@@ -43,7 +43,7 @@ export function RecruitCrmJobsEmbed({
   }, [isExpanded]);
 
   return (
-    <section className="bg-gray-100 py-16 sm:py-24" aria-labelledby="recruitcrm-jobs-heading">
+    <section className="bg-gray-100 py-16 sm:py-24" aria-labelledby="current-jobs-heading">
       <div className="mx-auto max-w-[1200px] px-6 lg:px-12">
         <div
           role={isExpanded ? "dialog" : undefined}
@@ -55,8 +55,8 @@ export function RecruitCrmJobsEmbed({
         >
           <div className={`flex min-h-20 shrink-0 items-center justify-between gap-4 border-b px-5 sm:px-7 ${isExpanded ? "border-white/10 bg-navy-950 text-white" : "border-gray-200"}`}>
             <div className="min-w-0 border-l-4 border-accent pl-4">
-              <p className={`text-[10px] font-semibold uppercase tracking-[0.2em] ${isExpanded ? "text-accent-light" : "text-accent-dark"}`}>RecruitCRM</p>
-              <h2 id="recruitcrm-jobs-heading" className={`mt-1 text-sm font-bold leading-tight tracking-tight sm:truncate sm:text-xl ${isExpanded ? "text-white" : "text-navy-950"}`}>
+              <p className={`text-[10px] font-semibold uppercase tracking-[0.2em] ${isExpanded ? "text-accent-light" : "text-accent-dark"}`}>CGIC Careers</p>
+              <h2 id="current-jobs-heading" className={`mt-1 text-sm font-bold leading-tight tracking-tight sm:truncate sm:text-xl ${isExpanded ? "text-white" : "text-navy-950"}`}>
                 {title}
               </h2>
             </div>

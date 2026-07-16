@@ -93,18 +93,22 @@ export function JobApplicationForm({ job, locale }: { job: Job; locale: Locale }
 
   if (state === "success") {
     return (
-      <div className="relative overflow-hidden bg-navy-950 px-7 py-12 text-white sm:px-12 sm:py-16" role="status">
-        <div className="absolute -right-16 -top-20 h-64 w-64 rounded-full border border-accent/30" aria-hidden="true" />
-        <div className="relative max-w-2xl">
-          <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-accent text-white">
+      <div className="relative overflow-hidden border border-navy-950/10 bg-navy-950 px-7 py-14 text-white sm:px-12 sm:py-20 lg:px-20" role="status">
+        <div className="absolute -right-20 -top-36 h-96 w-96 rounded-full border border-accent/25" aria-hidden="true" />
+        <div className="absolute -bottom-52 right-24 h-96 w-96 rounded-full border border-white/10" aria-hidden="true" />
+        <div className="relative grid items-center gap-10 lg:grid-cols-[auto_1fr] lg:gap-14">
+          <span className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-accent text-white sm:h-20 sm:w-20">
             <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>
           </span>
-          <p className="mt-8 text-xs font-semibold uppercase tracking-[0.2em] text-accent-light">{t("successEyebrow")}</p>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">{t("successTitle")}</h2>
-          <p className="mt-5 text-lg leading-relaxed text-white/65">{t("successBody")}</p>
-          <Link href="/jobs" className="mt-8 inline-flex items-center gap-2 font-semibold text-accent-light hover:text-white">
-            {t("backToJobs")} <span aria-hidden="true">→</span>
-          </Link>
+          <div className="max-w-3xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-light">{t("successEyebrow")}</p>
+            <h2 id="application-title" className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">{t("successTitle")}</h2>
+            <p className="mt-6 text-lg leading-relaxed text-white/70 sm:text-xl">{t("successBody", { role: job.title })}</p>
+            <p className="mt-4 text-sm leading-relaxed text-white/50">{t("successThanks")}</p>
+            <Link href="/jobs" className="mt-9 inline-flex items-center gap-3 font-semibold text-accent-light transition-colors hover:text-white">
+              {t("backToJobs")} <span aria-hidden="true">→</span>
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -114,7 +118,22 @@ export function JobApplicationForm({ job, locale }: { job: Job; locale: Locale }
   const labelClass = "text-xs font-semibold uppercase tracking-[0.14em] text-navy-950";
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="bg-gray-100 p-6 sm:p-10 lg:p-12" noValidate={false} aria-busy={isSubmitting}>
+    <div className="grid overflow-hidden border border-navy-950/10 lg:grid-cols-[0.72fr_1.28fr]">
+      <div className="relative overflow-hidden bg-navy-950 p-8 text-white sm:p-12">
+        <div className="absolute -bottom-28 -left-24 h-80 w-80 rounded-full border border-white/10" aria-hidden="true" />
+        <div className="relative">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-light">{t("eyebrow")}</p>
+          <h2 id="application-title" className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">{t("title")}</h2>
+          <p className="mt-6 text-lg leading-relaxed text-white/65">{t("intro", { role: job.title })}</p>
+          <ol className="mt-10 space-y-5 text-sm text-white/70">
+            {[t("stepProfile"), t("stepReview"), t("stepRecruiter")].map((step, index) => (
+              <li key={step} className="flex gap-4"><span className="font-semibold text-accent-light">0{index + 1}</span><span>{step}</span></li>
+            ))}
+          </ol>
+        </div>
+      </div>
+
+      <form ref={formRef} onSubmit={handleSubmit} className="bg-gray-100 p-6 sm:p-10 lg:p-12" noValidate={false} aria-busy={isSubmitting}>
       <input type="hidden" name="jobSlug" value={job.slug} />
       <input type="hidden" name="locale" value={locale} />
       <div className="absolute -left-[9999px]" aria-hidden="true">
@@ -248,6 +267,7 @@ export function JobApplicationForm({ job, locale }: { job: Job; locale: Locale }
           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
         )}
       </button>
-    </form>
+      </form>
+    </div>
   );
 }

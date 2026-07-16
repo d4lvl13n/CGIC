@@ -137,22 +137,7 @@ export default async function JobDetailPage({ params }: PageProps) {
       {active && (
         <section id="apply" className="scroll-mt-24 bg-white pb-24 sm:pb-32" aria-labelledby="application-title">
           <div className="mx-auto max-w-[1400px] px-6 lg:px-12">
-            <div className="grid overflow-hidden border border-navy-950/10 lg:grid-cols-[0.72fr_1.28fr]">
-              <div className="relative overflow-hidden bg-navy-950 p-8 text-white sm:p-12">
-                <div className="absolute -bottom-28 -left-24 h-80 w-80 rounded-full border border-white/10" aria-hidden="true" />
-                <div className="relative">
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-light">{t("application.eyebrow")}</p>
-                  <h2 id="application-title" className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">{t("application.title")}</h2>
-                  <p className="mt-6 text-lg leading-relaxed text-white/65">{t("application.intro", { role: job.title })}</p>
-                  <ol className="mt-10 space-y-5 text-sm text-white/70">
-                    {[t("application.stepProfile"), t("application.stepReview"), t("application.stepRecruiter")].map((step, index) => (
-                      <li key={step} className="flex gap-4"><span className="font-semibold text-accent-light">0{index + 1}</span><span>{step}</span></li>
-                    ))}
-                  </ol>
-                </div>
-              </div>
-              <JobApplicationForm job={job} locale={locale} />
-            </div>
+            <JobApplicationForm job={job} locale={locale} />
           </div>
         </section>
       )}
