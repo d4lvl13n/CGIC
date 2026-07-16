@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     description,
     alternates: getAlternates(locale, "/services"),
     openGraph: getOpenGraph(locale, title, description, "/services"),
-    twitter: { title, description },
+    twitter: { title, description, images: ["/og-image.png"] },
   };
 }
 

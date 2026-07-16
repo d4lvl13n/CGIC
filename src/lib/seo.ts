@@ -36,6 +36,14 @@ export function getOpenGraph(
       .filter((l) => l !== locale)
       .map((l) => ogLocaleMap[l]),
     type: "website" as const,
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "CGIC — Staffing and Consulting in Brussels",
+      },
+    ],
   };
 }
 

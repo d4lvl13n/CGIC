@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Pick<PageProps, "params">): P
     description,
     alternates: getAlternates(locale, "/insights"),
     openGraph: getOpenGraph(locale, title, description, "/insights"),
-    twitter: { title, description },
+    twitter: { title, description, images: ["/og-image.png"] },
   };
 }
 

@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description,
     alternates: { canonical: `${baseUrl}/${locale}${path}`, languages: jobAlternates(job) },
     openGraph: getOpenGraph(locale, title, description, path),
-    twitter: { title, description },
+    twitter: { title, description, images: ["/og-image.png"] },
     robots: active ? undefined : { index: false, follow: true },
   };
 }

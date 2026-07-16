@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     description,
     alternates: getAlternates(locale),
     openGraph: getOpenGraph(locale, title, description),
-    twitter: { title, description },
+    twitter: { title, description, images: ["/og-image.png"] },
   };
 }
 

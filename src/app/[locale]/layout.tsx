@@ -24,11 +24,6 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
-  icons: {
-    icon: [
-      { url: "/favicon.ico", sizes: "any" },
-    ],
-  },
   robots: {
     index: true,
     follow: true,
@@ -45,10 +40,19 @@ export const metadata: Metadata = {
     siteName: "CGIC",
     locale: "fr_BE",
     alternateLocale: ["en_GB", "nl_BE"],
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "CGIC — Staffing and Consulting in Brussels",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     site: "@cgic_be",
+    images: ["/og-image.png"],
   },
   alternates: {
     canonical: baseUrl,
