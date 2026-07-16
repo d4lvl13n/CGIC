@@ -2,8 +2,10 @@
 
 **Client:** Alsena Group
 **Prepared by:** Codolie Labs SL
-**Date:** 2026-01-22 (intake) | 2026-02-17 (this brief)
-**Status:** Pre-kickoff — Awaiting client clarifications
+**Date:** 2026-01-22 (intake) | 2026-02-17 (this brief) | 2026-07-15 (CGIC CMS decision)
+**Status:** Active — CGIC content-platform scope updated
+
+> **CGIC scope update (2026-07-15):** CGIC will add a headless WordPress editorial platform for Jobs and Articles. The implementation source of truth is [`HEADLESS_WORDPRESS_CONTENT_PLATFORM_SPEC.md`](./HEADLESS_WORDPRESS_CONTENT_PLATFORM_SPEC.md). Where this original intake brief conflicts with that specification for CGIC, the newer specification takes precedence.
 
 ---
 
@@ -13,7 +15,7 @@ Alsena Group has commissioned Codolie Labs to design and develop **3 corporate w
 
 | # | Domain | Working Name | Purpose |
 |---|--------|-------------|---------|
-| 1 | www.cgic.be | CGIC | Corporate info + Lead generation |
+| 1 | www.cgic.be | CGIC | Corporate info + Lead generation + Jobs + Articles |
 | 2 | www.alsena-group.eu | Alsena | Corporate info + Lead generation + Blog |
 | 3 | www.davit-consortium.eu | Davit | Corporate info + Lead generation |
 
@@ -31,13 +33,15 @@ All 3 sites share the same dual objective:
 
 ## 3. Pages & Structure
 
-### Site 1 — CGIC (5 pages)
+### Site 1 — CGIC (7 sections)
 
 | Page | Notes |
 |------|-------|
 | Home | Hero + value prop + CTA |
 | About | Company story, team, mission |
 | Services / Products | Service offerings |
+| Jobs | Headless WordPress job listing, filters, and offer details |
+| Insights | Headless WordPress article listing and article details |
 | Contact | Lead form (primary CTA) |
 | Legal (Privacy / Terms) | GDPR-compliant legal pages |
 
@@ -68,7 +72,8 @@ All 3 sites share the same dual objective:
 | Feature | CGIC | Alsena | Davit |
 |---------|------|--------|-------|
 | Contact form | Yes | Yes | Yes |
-| CMS / Blog | No | Yes | No |
+| CMS / Articles | Yes — headless WordPress | Yes | No |
+| Job board | Yes — headless WordPress | No | No |
 | Analytics (GA4) | Yes | Yes | Yes |
 | Multilingual (i18n) | Yes | Yes | Yes |
 | Newsletter signup | No | No | No |
@@ -175,7 +180,8 @@ All 3 sites share the same dual objective:
 | i18n | **next-intl** or native `[lang]` routing | Subpath routing, JSON dictionaries, server-side |
 | Forms | **React Hook Form + Zod** | Validation, type safety |
 | Email | **Resend** or **Nodemailer** | Contact form delivery |
-| Blog (Alsena only) | **MDX + Contentlayer** or headless CMS | Client-manageable content |
+| CGIC content CMS | **Headless WordPress + ACF Pro + Polylang Pro** | Non-technical Jobs and Articles publishing |
+| Alsena blog | **MDX + Contentlayer** or headless CMS | Client-manageable content; final choice remains open |
 | Analytics | **Google Analytics 4** + **Vercel Analytics** | Traffic + Web Vitals |
 | Hosting | **Vercel** | Zero-config deployment, edge network, preview URLs |
 

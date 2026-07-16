@@ -52,9 +52,6 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: baseUrl,
-    types: {
-      "application/rss+xml": `${baseUrl}/feed.xml`,
-    },
   },
   category: "business",
   other: {
@@ -92,6 +89,7 @@ export default async function LocaleLayout({ children, params }: Props) {
         <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://assets.mixkit.co" />
         <link rel="preconnect" href="https://assets.mixkit.co" crossOrigin="anonymous" />
+        <link rel="alternate" type="application/rss+xml" title="CGIC Insights" href={`${baseUrl}/${locale}/feed.xml`} />
       </head>
       <body className={`${inter.variable} font-sans bg-white text-gray-700 antialiased`}>
         <NextIntlClientProvider locale={locale} messages={messages}>

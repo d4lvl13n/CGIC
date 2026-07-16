@@ -1,5 +1,14 @@
 const baseUrl = "https://www.cgic.be";
 
+function JsonLdScript({ value }: { value: object }) {
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(value).replace(/</g, "\\u003c") }}
+    />
+  );
+}
+
 export function OrganizationJsonLd() {
   const jsonLd = {
     "@context": "https://schema.org",
@@ -100,6 +109,112 @@ export function BreadcrumbJsonLd({
       type="application/ld+json"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
     />
+  );
+}
+
+type JobPostingProps = {
+  title: string;
+  description: string;
+  reference: string;
+  publishedAt: string;
+  closingDate: string;
+  contractSlug: string;
+  location: {
+    label: string;
+    city?: string;
+    region?: string;
+    countryCode: string;
+    postalCode?: string;
+    streetAddress?: string;
+  };
+  workModeSlug: string;
+  applicantCountries?: string[];
+  url: string;
+};
+
+const employmentTypeMap: Record<string, string> = {
+  permanent: "FULL_TIME",
+  freelance: "CONTRACTOR",
+  temporary: "TEMPORARY",
+  internship: "INTERN",
+};
+
+export function JobPostingJsonLd(props: JobPostingProps) {
+  const remote = props.workModeSlug === "remote";
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "JobPosting",
+    title: props.title,
+    description: props.description,
+    identifier: {
+      "@type": "PropertyValue",
+      name: "CGIC",
+      value: props.reference,
+    },
+    datePosted: props.publishedAt,
+    validThrough: props.closingDate,
+    employmentType: employmentTypeMap[props.contractSlug] ?? "OTHER",
+    hiringOrganization: { "@id": `${baseUrl}/#organization` },
+    url: props.url,
+    directApply: false,
+    ...(remote ? {
+      jobLocationType: "TELECOMMUTE",
+      applicantLocationRequirements: props.applicantCountries?.map((country) => ({
+        "@type": "Country",
+        name: country,
+      })),
+    } : {
+      jobLocation: {
+        "@type": "Place",
+        name: props.location.label,
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: props.location.streetAddress,
+          postalCode: props.location.postalCode,
+          addressLocality: props.location.city,
+          addressRegion: props.location.region,
+          addressCountry: props.location.countryCode,
+        },
+      },
+    }),
+  };
+
+  return <JsonLdScript value={jsonLd} />;
+}
+
+export function ArticleJsonLd({
+  title,
+  description,
+  image,
+  byline,
+  publishedAt,
+  updatedAt,
+  url,
+  locale,
+}: {
+  title: string;
+  description: string;
+  image?: string;
+  byline: string;
+  publishedAt: string;
+  updatedAt: string;
+  url: string;
+  locale: string;
+}) {
+  return (
+    <JsonLdScript value={{
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: title,
+      description,
+      image: image ? [image] : undefined,
+      author: { "@type": "Organization", name: byline },
+      publisher: { "@id": `${baseUrl}/#organization` },
+      datePublished: publishedAt,
+      dateModified: updatedAt,
+      mainEntityOfPage: url,
+      inLanguage: locale,
+    }} />
   );
 }
 

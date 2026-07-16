@@ -11,12 +11,15 @@ import Image from "next/image";
 const navLinks = [
   { href: "/about", key: "about" },
   { href: "/services", key: "services" },
+  { href: "/jobs", key: "jobs" },
+  { href: "/insights", key: "insights" },
   { href: "/contact", key: "contact" },
 ] as const;
 
 export function Header() {
   const t = useTranslations("nav");
   const pathname = usePathname();
+  const hasLightHero = pathname === "/insights" || pathname.startsWith("/insights/");
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -36,7 +39,7 @@ export function Header() {
     <header
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
-        scrolled
+        scrolled || hasLightHero
           ? "bg-navy-950/90 backdrop-blur-xl border-b border-white/5"
           : "bg-transparent"
       )}
@@ -49,20 +52,20 @@ export function Header() {
         </Link>
 
         {/* Desktop nav — spread like GE */}
-        <nav className="hidden items-center gap-10 md:flex">
+        <nav className="hidden items-center gap-6 lg:gap-9 md:flex">
           {navLinks.map((link) => (
             <Link
               key={link.key}
               href={link.href}
               className={cn(
                 "relative text-[15px] font-normal tracking-wide transition-colors",
-                pathname === link.href
+                pathname === link.href || pathname.startsWith(`${link.href}/`)
                   ? "text-white"
                   : "text-white/80 hover:text-white"
               )}
             >
               {t(link.key)}
-              {pathname === link.href && (
+              {(pathname === link.href || pathname.startsWith(`${link.href}/`)) && (
                 <motion.div
                   layoutId="activeNav"
                   className="absolute -bottom-1 left-0 right-0 h-px bg-white"
@@ -114,7 +117,7 @@ export function Header() {
                   href={link.href}
                   className={cn(
                     "py-3 text-lg font-light tracking-wide transition-colors",
-                    pathname === link.href
+                    pathname === link.href || pathname.startsWith(`${link.href}/`)
                       ? "text-white"
                       : "text-white/80 hover:text-white"
                   )}

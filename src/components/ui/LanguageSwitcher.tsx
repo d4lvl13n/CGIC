@@ -17,7 +17,22 @@ export function LanguageSwitcher() {
   const router = useRouter();
 
   function handleChange(newLocale: string) {
-    router.replace(pathname, { locale: newLocale });
+    const alternate = document.querySelector<HTMLLinkElement>(
+      `link[rel="alternate"][hreflang="${newLocale}"]`,
+    );
+    if (alternate?.href) {
+      const url = new URL(alternate.href);
+      const localizedPath = url.pathname.replace(/^\/(fr|en|nl)(?=\/|$)/, "") || "/";
+      router.replace(`${localizedPath}${url.search}`, { locale: newLocale });
+      return;
+    }
+
+    const fallback = pathname.startsWith("/jobs/")
+      ? "/jobs"
+      : pathname.startsWith("/insights/")
+        ? "/insights"
+        : pathname;
+    router.replace(fallback, { locale: newLocale });
   }
 
   return (

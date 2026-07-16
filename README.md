@@ -1,4 +1,37 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CGIC website
+
+Next.js public website for CG International Consulting, including multilingual marketing pages, RecruitCRM Jobs, and WordPress-ready Insights.
+
+## Content modes
+
+The public Jobs page embeds the live RecruitCRM board at `https://recruitcrm.io/jobs/Alsena_Ltd_jobs`. RecruitCRM is now the public source of truth for active opportunities.
+
+Insights run without WordPress by default using typed multilingual fixtures from `src/lib/content/fixtures.ts`. The previous custom Jobs UI, typed job fixtures, detail route, and WordPress job scaffold remain in the repository but are not linked from the public job board or emitted in the sitemap.
+
+Set `WORDPRESS_API_URL` to switch the server-side content provider to WordPress:
+
+```bash
+cp .env.example .env.local
+# Edit WORDPRESS_API_URL and secrets in .env.local
+```
+
+WordPress REST responses are validated, normalized, and sanitized under `src/lib/content/` and `src/lib/wordpress/`.
+
+## Content routes
+
+- `/{locale}/jobs`
+- `/{locale}/insights`
+- `/{locale}/insights/{slug}`
+- `/{locale}/feed.xml`
+- `/api/revalidate`
+
+Supported locales are French (`fr`), English (`en`), and Dutch (`nl`).
+
+## WordPress handoff
+
+The installable integration scaffold remains in `wordpress/plugins/cgic-content/`. It is retained for now and has not been deleted, although RecruitCRM supersedes its public Jobs listing.
+
+The full architecture, content model, workflows, and acceptance criteria are in `docs/HEADLESS_WORDPRESS_CONTENT_PLATFORM_SPEC.md`.
 
 ## Getting Started
 
@@ -14,11 +47,9 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000/fr/jobs](http://localhost:3000/fr/jobs) or [http://localhost:3000/fr/insights](http://localhost:3000/fr/insights).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The application uses Next.js App Router, React, Tailwind CSS, next-intl, and Framer Motion.
 
 ## Learn More
 

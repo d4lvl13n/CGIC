@@ -1,6 +1,14 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
+const cmsHostname = (() => {
+  try {
+    return process.env.WORDPRESS_API_URL ? new URL(process.env.WORDPRESS_API_URL).hostname : null;
+  } catch {
+    return null;
+  }
+})();
+
 const securityHeaders = [
   { key: "X-DNS-Prefetch-Control", value: "on" },
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
@@ -38,6 +46,7 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com" },
+      ...(cmsHostname ? [{ protocol: "https" as const, hostname: cmsHostname }] : []),
     ],
   },
 };
