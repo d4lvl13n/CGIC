@@ -29,8 +29,11 @@ export const recruitCrmJobSchema = z.object({
   job_code: z.string().nullish(),
   job_description_text: z.string().nullish(),
   job_location_type: z.union([z.number(), z.string()]).nullish(),
-  salary_type: z.string().nullish(),
-  job_posting_status: z.string().nullish(),
+  // RecruitCRM's live payload currently returns an object here although the
+  // published reference describes a string. This field is not used by CGIC.
+  salary_type: z.unknown().optional(),
+  // The live API uses 0/1 while older/reference payloads use string labels.
+  job_posting_status: z.union([z.string(), z.number(), z.boolean()]).nullish(),
   application_form_url: z.string().nullish(),
   created_on: z.string().nullish(),
   updated_on: z.string().nullish(),

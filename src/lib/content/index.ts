@@ -77,10 +77,12 @@ function isTruthyFlag(value: unknown) {
 
 function isRecruitCrmJobPublic(job: RecruitCrmJob) {
   const status = job.job_status?.label.trim().toLowerCase();
-  const posting = job.job_posting_status?.trim().toLowerCase();
-  const published = posting
-    ? ["publish", "posted", "live"].some((marker) => posting.includes(marker))
-    : isTruthyFlag(job.enable_job_application_form);
+  const posting = job.job_posting_status;
+  const published = typeof posting === "string"
+    ? ["publish", "posted", "live", "1", "true"].some((marker) => posting.trim().toLowerCase().includes(marker))
+    : posting === undefined || posting === null
+      ? isTruthyFlag(job.enable_job_application_form)
+      : isTruthyFlag(posting);
   return status === "open" && published && isTruthyFlag(job.enable_job_application_form);
 }
 

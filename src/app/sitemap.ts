@@ -11,6 +11,17 @@ interface PageConfig {
   priority: number;
 }
 
+async function getJobsForSitemap(locale: (typeof locales)[number]) {
+  try {
+    return await getJobs(locale);
+  } catch (error) {
+    // A third-party API outage or additive schema change must not prevent the
+    // entire site from deploying. Dynamic job pages will recover independently.
+    console.error(`RecruitCRM jobs omitted from ${locale} sitemap`, error);
+    return [];
+  }
+}
+
 const pages: PageConfig[] = [
   { path: "", changeFrequency: "weekly", priority: 1.0 },
   { path: "/about", changeFrequency: "monthly", priority: 0.8 },
@@ -48,7 +59,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const content = await Promise.all(locales.map(async (locale) => ({
     locale,
     articles: await getAllArticles(locale),
-    jobs: await getJobs(locale),
+    jobs: await getJobsForSitemap(locale),
   })));
 
   for (const { locale, articles, jobs } of content) {
