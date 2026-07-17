@@ -7,6 +7,7 @@ import {
   createRecruitCrmCandidate,
   findRecruitCrmCandidateByEmail,
   isRecruitCrmConfigured,
+  RecruitCrmApiError,
 } from "@/lib/recruitcrm/client";
 import { captureInTalentVault, isTalentVaultConfigured } from "@/lib/talent-vault/client";
 
@@ -18,6 +19,9 @@ function error(code: string, status: number, details?: unknown) {
 }
 
 export async function POST(request: Request) {
+  const startedAt = Date.now();
+  const requestId = request.headers.get("x-vercel-id");
+
   if (!isRecruitCrmConfigured()) return error("INTEGRATION_NOT_CONFIGURED", 503);
 
   let formData: FormData;
@@ -74,12 +78,31 @@ export async function POST(request: Request) {
       });
     }
 
+    console.log(JSON.stringify({
+      level: "info",
+      message: "Job application submitted",
+      route: "/api/job-applications",
+      requestId,
+      status: application.alreadyApplied ? "already_applied" : "applied",
+      durationMs: Date.now() - startedAt,
+    }));
+
     return NextResponse.json({
       ok: true,
       application: { status: application.alreadyApplied ? "already_applied" : "applied" },
     });
   } catch (cause) {
-    console.error("RecruitCRM application failed", { stage: recruitCrmStage, cause });
+    console.error(JSON.stringify({
+      level: "error",
+      message: "RecruitCRM application failed",
+      route: "/api/job-applications",
+      requestId,
+      stage: recruitCrmStage,
+      errorName: cause instanceof Error ? cause.name : "UnknownError",
+      errorMessage: cause instanceof Error ? cause.message : String(cause),
+      providerStatus: cause instanceof RecruitCrmApiError ? cause.status : undefined,
+      durationMs: Date.now() - startedAt,
+    }));
     return error("RECRUITCRM_SUBMISSION_FAILED", 502);
   }
 }

@@ -185,6 +185,15 @@ function matchesRecruitCrmApplication(
   return application.candidate_slug === candidateSlug && application.job_slug === jobSlug;
 }
 
+function isEmptyRecruitCrmApplication(payload: unknown) {
+  if (payload === null) return true;
+  if (Array.isArray(payload)) return payload.length === 0;
+  if (typeof payload !== "object" || !("data" in payload)) return false;
+
+  const data = (payload as { data?: unknown }).data;
+  return data === null || (Array.isArray(data) && data.length === 0);
+}
+
 async function getRecruitCrmApplication(candidateSlug: string, jobSlug: string) {
   const response = await recruitCrmFetch(
     `/v1/candidates/${encodeURIComponent(candidateSlug)}/hiring-stages/${encodeURIComponent(jobSlug)}`,
@@ -194,6 +203,8 @@ async function getRecruitCrmApplication(candidateSlug: string, jobSlug: string) 
   if (!response.ok) return null;
 
   const payload: unknown = await response.json();
+  if (isEmptyRecruitCrmApplication(payload)) return null;
+
   const application = recruitCrmCandidateJobAssociationResponseSchema.parse(payload);
   if (!matchesRecruitCrmApplication(application, candidateSlug, jobSlug)) {
     throw new RecruitCrmApiError(
