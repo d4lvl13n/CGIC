@@ -205,15 +205,20 @@ async function getRecruitCrmApplication(candidateSlug: string, jobSlug: string) 
   const payload: unknown = await response.json();
   if (isEmptyRecruitCrmApplication(payload)) return null;
 
-  const application = recruitCrmCandidateJobAssociationResponseSchema.parse(payload);
-  if (!matchesRecruitCrmApplication(application, candidateSlug, jobSlug)) {
+  const parsed = recruitCrmCandidateJobAssociationResponseSchema.safeParse(payload);
+  if (parsed.success && !matchesRecruitCrmApplication(parsed.data, candidateSlug, jobSlug)) {
     throw new RecruitCrmApiError(
       "RecruitCRM returned an unexpected candidate/job association",
       502,
       payload,
     );
   }
-  return application;
+
+  // The live hiring-stage endpoint can return the stage itself rather than an
+  // association containing candidate_slug/job_slug. Because the request URL is
+  // already scoped to this exact candidate and job, any non-empty 200 response
+  // confirms that the candidate is linked to the job.
+  return parsed.success ? parsed.data : payload;
 }
 
 export async function applyRecruitCrmCandidate(candidateSlug: string, jobSlug: string) {
@@ -222,20 +227,10 @@ export async function applyRecruitCrmCandidate(candidateSlug: string, jobSlug: s
   }
 
   const query = new URLSearchParams({ job_slug: jobSlug });
-  const response = await recruitCrmFetch(
+  await recruitCrmFetch(
     `/v1/candidates/${encodeURIComponent(candidateSlug)}/assign?${query}`,
     { method: "POST", cache: "no-store" },
   );
-
-  const payload: unknown = await response.json();
-  const application = recruitCrmCandidateJobAssociationResponseSchema.parse(payload);
-  if (!matchesRecruitCrmApplication(application, candidateSlug, jobSlug)) {
-    throw new RecruitCrmApiError(
-      "RecruitCRM did not confirm the requested candidate/job assignment",
-      502,
-      payload,
-    );
-  }
 
   if (!(await getRecruitCrmApplication(candidateSlug, jobSlug))) {
     throw new RecruitCrmApiError(
