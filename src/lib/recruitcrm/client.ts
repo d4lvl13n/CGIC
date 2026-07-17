@@ -1,10 +1,12 @@
 import "server-only";
 
 import {
+  recruitCrmAssignedCandidatesResponseSchema,
   recruitCrmCandidateSchema,
   recruitCrmCandidateCreateResponseSchema,
   recruitCrmCandidateJobAssociationResponseSchema,
   recruitCrmCandidateSearchResponseSchema,
+  recruitCrmJobsResponseSchema,
   recruitCrmPublicJobsResponseSchema,
   type RecruitCrmJob,
   type RecruitCrmPublicJob,
@@ -109,6 +111,53 @@ export async function listRecruitCrmJobs(): Promise<RecruitCrmJob[]> {
   return payload.data.jobs.map(normalizePublicJob);
 }
 
+type RecruitCrmJobIdentity = {
+  publicSlug: string;
+  name: string;
+  city?: string;
+  jobCode?: string;
+};
+
+function comparable(value?: string | null) {
+  return value?.trim().toLocaleLowerCase("en") ?? "";
+}
+
+export async function resolveRecruitCrmJobSlug(identity: RecruitCrmJobIdentity) {
+  const response = await recruitCrmFetch(
+    "/v1/jobs?limit=100&sort_by=updatedon&sort_order=desc",
+    { cache: "no-store" },
+  );
+  const jobs = recruitCrmJobsResponseSchema.parse(await response.json()).data;
+
+  const directMatch = jobs.find((job) => job.slug === identity.publicSlug);
+  if (directMatch) return directMatch.slug;
+
+  let matches = jobs.filter((job) => comparable(job.name) === comparable(identity.name));
+  if (identity.jobCode) {
+    const codeMatches = matches.filter(
+      (job) => comparable(job.job_code) === comparable(identity.jobCode),
+    );
+    if (codeMatches.length) matches = codeMatches;
+  }
+  if (matches.length > 1 && identity.city) {
+    const cityMatches = matches.filter(
+      (job) => comparable(job.city) === comparable(identity.city),
+    );
+    if (cityMatches.length) matches = cityMatches;
+  }
+
+  if (matches.length !== 1) {
+    throw new RecruitCrmApiError(
+      matches.length
+        ? "RecruitCRM job mapping is ambiguous"
+        : "RecruitCRM job could not be mapped to its internal record",
+      502,
+      { publicSlug: identity.publicSlug, matchCount: matches.length },
+    );
+  }
+  return matches[0].slug;
+}
+
 export async function findRecruitCrmCandidateByEmail(email: string) {
   const query = new URLSearchParams({ email, exact_search: "true" });
   const response = await recruitCrmFetch(`/v1/candidates/search?${query}`, { cache: "no-store" });
@@ -185,59 +234,56 @@ function matchesRecruitCrmApplication(
   return application.candidate_slug === candidateSlug && application.job_slug === jobSlug;
 }
 
-function isEmptyRecruitCrmApplication(payload: unknown) {
-  if (payload === null) return true;
-  if (Array.isArray(payload)) return payload.length === 0;
-  if (typeof payload !== "object" || !("data" in payload)) return false;
+async function isRecruitCrmCandidateAssignedToJob(candidateSlug: string, jobSlug: string) {
+  let page = 1;
+  do {
+    const query = new URLSearchParams({ limit: "100", page: String(page) });
+    const response = await recruitCrmFetch(
+      `/v1/jobs/${encodeURIComponent(jobSlug)}/assigned-candidates?${query}`,
+      { cache: "no-store" },
+    );
+    const payload = recruitCrmAssignedCandidatesResponseSchema.parse(await response.json());
+    if (payload.data.some((entry) => entry.candidate.slug === candidateSlug)) return true;
 
-  const data = (payload as { data?: unknown }).data;
-  return data === null || (Array.isArray(data) && data.length === 0);
+    const lastPage = Number(payload.last_page ?? payload.current_page ?? page);
+    if (page >= lastPage || payload.data.length === 0) return false;
+    page += 1;
+  } while (page <= 20);
+
+  throw new RecruitCrmApiError("RecruitCRM candidate assignment lookup exceeded 20 pages", 502);
 }
 
-async function getRecruitCrmApplication(candidateSlug: string, jobSlug: string) {
+export async function applyRecruitCrmCandidate(candidateSlug: string, jobSlug: string) {
+  if (await isRecruitCrmCandidateAssignedToJob(candidateSlug, jobSlug)) {
+    return { alreadyApplied: true };
+  }
+
+  const query = new URLSearchParams({ job_slug: jobSlug });
   const response = await recruitCrmFetch(
-    `/v1/candidates/${encodeURIComponent(candidateSlug)}/hiring-stages/${encodeURIComponent(jobSlug)}`,
-    { cache: "no-store" },
-    [404, 422],
+    `/v1/candidates/${encodeURIComponent(candidateSlug)}/apply?${query}`,
+    { method: "POST", cache: "no-store" },
   );
-  if (!response.ok) return null;
 
-  const payload: unknown = await response.json();
-  if (isEmptyRecruitCrmApplication(payload)) return null;
-
+  const payload: unknown = await response.json().catch(() => null);
   const parsed = recruitCrmCandidateJobAssociationResponseSchema.safeParse(payload);
   if (parsed.success && !matchesRecruitCrmApplication(parsed.data, candidateSlug, jobSlug)) {
     throw new RecruitCrmApiError(
-      "RecruitCRM returned an unexpected candidate/job association",
+      "RecruitCRM did not confirm the requested candidate/job application",
       502,
       payload,
     );
   }
 
-  // The live hiring-stage endpoint can return the stage itself rather than an
-  // association containing candidate_slug/job_slug. Because the request URL is
-  // already scoped to this exact candidate and job, any non-empty 200 response
-  // confirms that the candidate is linked to the job.
-  return parsed.success ? parsed.data : payload;
-}
-
-export async function applyRecruitCrmCandidate(candidateSlug: string, jobSlug: string) {
-  if (await getRecruitCrmApplication(candidateSlug, jobSlug)) {
-    return { alreadyApplied: true };
+  for (const delayMs of [0, 250, 750]) {
+    if (delayMs) await new Promise((resolve) => setTimeout(resolve, delayMs));
+    if (await isRecruitCrmCandidateAssignedToJob(candidateSlug, jobSlug)) {
+      return { alreadyApplied: false };
+    }
   }
 
-  const query = new URLSearchParams({ job_slug: jobSlug });
-  await recruitCrmFetch(
-    `/v1/candidates/${encodeURIComponent(candidateSlug)}/assign?${query}`,
-    { method: "POST", cache: "no-store" },
+  throw new RecruitCrmApiError(
+    "RecruitCRM application could not be verified in the job candidate list",
+    502,
+    { candidateSlug, jobSlug },
   );
-
-  if (!(await getRecruitCrmApplication(candidateSlug, jobSlug))) {
-    throw new RecruitCrmApiError(
-      "RecruitCRM assignment could not be verified",
-      502,
-      { candidateSlug, jobSlug },
-    );
-  }
-  return { alreadyApplied: false };
 }

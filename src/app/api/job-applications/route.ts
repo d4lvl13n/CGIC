@@ -8,6 +8,7 @@ import {
   findRecruitCrmCandidateByEmail,
   isRecruitCrmConfigured,
   RecruitCrmApiError,
+  resolveRecruitCrmJobSlug,
 } from "@/lib/recruitcrm/client";
 import { captureInTalentVault, isTalentVaultConfigured } from "@/lib/talent-vault/client";
 
@@ -63,8 +64,16 @@ export async function POST(request: Request) {
       });
     }
 
+    recruitCrmStage = "job_resolution";
+    const internalJobSlug = await resolveRecruitCrmJobSlug({
+      publicSlug: job.recruitCrmSlug,
+      name: job.title,
+      city: job.location.city,
+      jobCode: job.reference.startsWith("RCRM-") ? undefined : job.reference,
+    });
+
     recruitCrmStage = "job_application";
-    const application = await applyRecruitCrmCandidate(candidate.slug, job.recruitCrmSlug);
+    const application = await applyRecruitCrmCandidate(candidate.slug, internalJobSlug);
 
     // Optional sidecar only: RecruitCRM is the application system of record.
     // This task runs after the response and can never block or change the application result.

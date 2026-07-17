@@ -43,6 +43,16 @@ export const recruitCrmJobsResponseSchema = z.object({
   data: z.array(recruitCrmJobSchema),
 }).passthrough();
 
+export const recruitCrmAssignedCandidatesResponseSchema = z.object({
+  current_page: z.union([z.number(), z.string()]).nullish(),
+  last_page: z.union([z.number(), z.string()]).nullish(),
+  data: z.array(z.object({
+    candidate: z.object({
+      slug: idSchema,
+    }).passthrough(),
+  }).passthrough()),
+}).passthrough();
+
 const recruitCrmPublicJobSchema = z.object({
   slug: idSchema,
   srno: z.union([z.string(), z.number()]).nullish(),
