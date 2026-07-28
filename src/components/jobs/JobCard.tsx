@@ -31,9 +31,19 @@ export function JobCard({ job, locale, labels }: { job: Job; locale: Locale; lab
         <h2 className="mt-4 max-w-3xl text-2xl font-bold tracking-tight text-navy-950 transition-colors group-hover:text-navy-700 sm:text-3xl">
           <Link href={`/jobs/${job.slug}`}>{job.title}</Link>
         </h2>
-        <p className="mt-4 max-w-3xl text-base leading-relaxed text-gray-500 sm:text-lg">
-          {job.summary}
-        </p>
+        {job.teaser ? (
+          <p className="mt-4 max-w-3xl text-base leading-relaxed text-gray-500 sm:text-lg">
+            {job.teaser}
+          </p>
+        ) : job.skills.length > 0 ? (
+          <div className="mt-4 flex max-w-3xl flex-wrap gap-2">
+            {job.skills.slice(0, 6).map((skill) => (
+              <span key={skill.slug} className="rounded-full border border-navy-950/10 px-3 py-1 text-xs font-medium text-gray-600">
+                {skill.label}
+              </span>
+            ))}
+          </div>
+        ) : null}
         <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-600">
           <span>{job.location.label}</span>
           <span>{job.contractType.label}</span>

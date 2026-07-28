@@ -30,6 +30,7 @@ export type Job = {
   slug: string;
   title: string;
   summary: string;
+  teaser: string;
   responsibilitiesHtml: string;
   candidateProfileHtml: string;
   offerHtml?: string;

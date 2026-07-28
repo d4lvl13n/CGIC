@@ -89,7 +89,9 @@ export default async function JobDetailPage({ params }: PageProps) {
                 <span>{job.expertise.label}</span><span className="text-white/25">/</span><span className="text-white/45">{job.reference}</span>
               </div>
               <h1 className="mt-6 max-w-5xl text-5xl font-bold leading-[1.02] tracking-[-0.035em] sm:text-6xl md:text-7xl">{job.title}</h1>
-              <p className="mt-7 max-w-3xl text-lg leading-relaxed text-white/65 sm:text-xl">{job.summary}</p>
+              {job.teaser ? (
+                <p className="mt-7 max-w-3xl text-lg leading-relaxed text-white/65 sm:text-xl">{job.teaser}</p>
+              ) : null}
             </div>
             <dl className="grid grid-cols-2 gap-x-6 gap-y-7 border-l border-white/15 pl-6 text-sm lg:grid-cols-1">
               {[

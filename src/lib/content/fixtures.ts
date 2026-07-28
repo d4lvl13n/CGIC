@@ -204,6 +204,7 @@ export function getFixtureJobs(locale: Locale): Job[] {
     slug: job.slug,
     title: job.title,
     summary: job.summary,
+    teaser: job.summary,
     responsibilitiesHtml: job.responsibilities,
     candidateProfileHtml: job.profile,
     offerHtml: job.offer,

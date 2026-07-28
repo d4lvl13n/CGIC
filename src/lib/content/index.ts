@@ -99,8 +99,11 @@ function normalizeRecruitCrmJob(job: RecruitCrmJob, locale: Locale): Job {
   const jobType = Number(job.job_type) as 1 | 2 | 3 | 4;
   const locationType = Number(job.job_location_type) as 0 | 1 | 2;
   const descriptionHtml = recruiterDescription(job);
-  const summarySource = job.note_for_candidates?.trim() || plainTextFromHtml(descriptionHtml);
-  const summary = summarySource.length > 240 ? `${summarySource.slice(0, 237).trimEnd()}…` : summarySource;
+  const truncate = (value: string) => (value.length > 240 ? `${value.slice(0, 237).trimEnd()}…` : value);
+  // summary feeds SEO meta descriptions, so it may fall back to the description;
+  // teaser is candidate-facing card copy and only comes from note_for_candidates.
+  const summary = truncate(job.note_for_candidates?.trim() || plainTextFromHtml(descriptionHtml));
+  const teaser = truncate(plainTextFromHtml(job.note_for_candidates?.trim() ?? ""));
   const publicSlug = `${slugify(job.name) || "opportunity"}-${job.slug}`;
   const locationLabel = [job.city, job.country].filter(Boolean).join(", ") || labels.mode[locationType] || "Belgium";
   const expertiseLabel = job.job_category?.trim() || "Consulting";
@@ -118,6 +121,7 @@ function normalizeRecruitCrmJob(job: RecruitCrmJob, locale: Locale): Job {
     slug: publicSlug,
     title: job.name,
     summary,
+    teaser,
     responsibilitiesHtml: descriptionHtml,
     candidateProfileHtml: "",
     location: {
@@ -212,6 +216,7 @@ function normalizeJob(item: WpContentItem, locale: Locale): Job {
     slug: item.slug,
     title: plainTextFromHtml(item.title.rendered),
     summary: stringField(item, "summary", true)!,
+    teaser: stringField(item, "summary", true)!,
     responsibilitiesHtml: sanitizeCmsHtml(stringField(item, "responsibilities", true)!),
     candidateProfileHtml: sanitizeCmsHtml(stringField(item, "candidate_profile", true)!),
     offerHtml: stringField(item, "offer") ? sanitizeCmsHtml(stringField(item, "offer")!) : undefined,
