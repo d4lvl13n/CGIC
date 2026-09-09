@@ -88,3 +88,28 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Job translations
+
+Job copy is authored once in RecruitCRM, in whatever language the recruiter uses, and
+translated into the other locales by a scheduled job. The Alsena site shares the same
+RecruitCRM board and the same custom fields, so a translation written by either site's
+cron is rendered by both; the schedules are offset (Alsena 06:00/18:00, CGIC 07:00/19:00)
+so they never race on the same empty field.
+
+- `/api/cron/translate-jobs` fills any **empty** `description_en` / `description_fr` /
+  `description_nl` job custom field and never touches a field that already has content —
+  so a recruiter's correction survives every later run. To force a re-translation, clear
+  the field in RecruitCRM.
+- Translations are stored as **Markdown**, not HTML. These custom fields strip tags:
+  `<ul><li>a</li></ul>` comes back as `a`. Markdown carries the structure through untouched
+  and stays readable for a recruiter editing the record.
+- A bare `<` silently truncates the stored value from that point to the end. The model is
+  instructed to emit `&lt;`, and `escapeForCustomField()` enforces it before writing.
+- Fields are `longtext`, capped at **5000 characters**. A translation over the cap fails
+  that one locale and is reported in the cron response rather than being written truncated.
+- Each run stops at a 240s budget (or `?limit=`) and reports `incomplete`; the next run
+  resumes because only empty fields are filled.
+- The site renders the stored Markdown through the same sanitiser as any other CMS copy.
+  When a locale has no translation yet, the page falls back to the source description and
+  omits `inLanguage` rather than asserting a language it cannot know.

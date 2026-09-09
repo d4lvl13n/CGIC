@@ -2,6 +2,21 @@ import { z } from "zod";
 
 const idSchema = z.union([z.string(), z.number()]).transform(String);
 
+const recruitCrmCustomFieldSchema = z.object({
+  field_id: z.number(),
+  field_name: z.string(),
+  field_type: z.string().nullish(),
+  value: z.string().nullish(),
+}).passthrough();
+
+export const recruitCrmCustomFieldDefinitionsSchema = z.array(
+  z.object({
+    field_id: z.number(),
+    field_name: z.string(),
+    field_type: z.string(),
+  }).passthrough(),
+);
+
 export const recruitCrmJobSchema = z.object({
   id: z.union([z.number(), z.string()]),
   name: z.string().min(1),
@@ -37,9 +52,12 @@ export const recruitCrmJobSchema = z.object({
   application_form_url: z.string().nullish(),
   created_on: z.string().nullish(),
   updated_on: z.string().nullish(),
+  custom_fields: z.array(recruitCrmCustomFieldSchema).nullish(),
 }).passthrough();
 
 export const recruitCrmJobsResponseSchema = z.object({
+  current_page: z.union([z.number(), z.string()]).nullish(),
+  last_page: z.union([z.number(), z.string()]).nullish(),
   data: z.array(recruitCrmJobSchema),
 }).passthrough();
 

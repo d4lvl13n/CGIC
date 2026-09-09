@@ -6,6 +6,7 @@ import {
   recruitCrmCandidateCreateResponseSchema,
   recruitCrmCandidateJobAssociationResponseSchema,
   recruitCrmCandidateSearchResponseSchema,
+  recruitCrmCustomFieldDefinitionsSchema,
   recruitCrmJobsResponseSchema,
   recruitCrmPublicJobsResponseSchema,
   type RecruitCrmJob,
@@ -109,6 +110,79 @@ export async function listRecruitCrmJobs(): Promise<RecruitCrmJob[]> {
     throw new RecruitCrmApiError(payload.message || "RecruitCRM public jobs request failed", 502, payload);
   }
   return payload.data.jobs.map(normalizePublicJob);
+}
+
+const INTERNAL_JOBS_TAG = "recruitcrm-internal-jobs";
+const INTERNAL_JOBS_REVALIDATE = 300;
+const INTERNAL_JOBS_MAX_PAGES = 10;
+
+/**
+ * The authenticated job index. The public board returns only slug, name, city and
+ * description; job code, skills, country, dates and — critically — the per-locale
+ * translation custom fields exist only on the authenticated record. Paginated and
+ * cached; `fresh` bypasses the cache for the translation cron.
+ */
+export async function listInternalRecruitCrmJobs({ fresh = false } = {}): Promise<RecruitCrmJob[]> {
+  const jobs: RecruitCrmJob[] = [];
+  for (let page = 1; page <= INTERNAL_JOBS_MAX_PAGES; page += 1) {
+    const query = new URLSearchParams({ limit: "100", page: String(page), sort_by: "updatedon", sort_order: "desc" });
+    const response = await recruitCrmFetch(
+      `/v1/jobs?${query}`,
+      fresh ? { cache: "no-store" } : { next: { revalidate: INTERNAL_JOBS_REVALIDATE, tags: [INTERNAL_JOBS_TAG] } },
+    );
+    const payload = recruitCrmJobsResponseSchema.parse(await response.json());
+    jobs.push(...payload.data);
+    const lastPage = Number(payload.last_page ?? page);
+    if (!Number.isFinite(lastPage) || page >= lastPage || payload.data.length === 0) break;
+  }
+  return jobs;
+}
+
+/**
+ * Job custom fields hold the per-locale translations (`description_en/fr/nl`).
+ *
+ * Measured behaviour of these fields, which the writer must respect:
+ * - type `longtext`, hard cap 5000 characters;
+ * - HTML tags are stripped, so translations are stored as Markdown;
+ * - a bare `<` truncates the value from that point to the end, silently — so `<`
+ *   must arrive already escaped as `&lt;`.
+ */
+export const JOB_TRANSLATION_FIELD_MAX = 5000;
+
+export async function listRecruitCrmJobCustomFields() {
+  const response = await recruitCrmFetch("/v1/custom-fields/jobs", {
+    next: { revalidate: 3600, tags: ["recruitcrm-job-custom-fields"] },
+  });
+  return recruitCrmCustomFieldDefinitionsSchema.parse(await response.json());
+}
+
+/** Reads the translation values already stored on a job, keyed by field name. */
+export function jobCustomFieldValues(job: RecruitCrmJob) {
+  const entries = (job.custom_fields ?? []).map(
+    (field) => [field.field_name, field.value?.trim() || ""] as const,
+  );
+  return Object.fromEntries(entries) as Record<string, string>;
+}
+
+/**
+ * Writes one custom field. `POST /v1/jobs/{slug}` merges — verified by diffing all
+ * 60 fields of a job before and after a partial write — so only the named field
+ * changes.
+ */
+export async function writeRecruitCrmJobCustomField(jobSlug: string, fieldId: number, value: string) {
+  if (value.length > JOB_TRANSLATION_FIELD_MAX) {
+    throw new RecruitCrmApiError(
+      `Translation exceeds the ${JOB_TRANSLATION_FIELD_MAX}-character field limit`,
+      422,
+      { jobSlug, fieldId, length: value.length },
+    );
+  }
+  await recruitCrmFetch(`/v1/jobs/${encodeURIComponent(jobSlug)}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ custom_fields: [{ field_id: fieldId, value }] }),
+    cache: "no-store",
+  });
 }
 
 type RecruitCrmJobIdentity = {

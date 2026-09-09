@@ -62,6 +62,7 @@ export default async function JobDetailPage({ params }: PageProps) {
         <JobPostingJsonLd
           title={job.title}
           description={job.responsibilitiesHtml}
+          inLanguage={job.descriptionLocale}
           reference={job.reference}
           publishedAt={job.publishedAt}
           closingDate={job.closingDate}

@@ -32,6 +32,8 @@ export type Job = {
   summary: string;
   teaser: string;
   responsibilitiesHtml: string;
+  /** Locale of the rendered description, or null when falling back to the untranslated source. */
+  descriptionLocale?: Locale | null;
   candidateProfileHtml: string;
   offerHtml?: string;
   location: TaxonomyValue & {

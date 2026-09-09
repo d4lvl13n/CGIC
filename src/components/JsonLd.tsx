@@ -115,6 +115,8 @@ export function BreadcrumbJsonLd({
 type JobPostingProps = {
   title: string;
   description: string;
+  /** Language of the rendered description; omitted when the site fell back to an untranslated source. */
+  inLanguage?: string | null;
   reference: string;
   publishedAt: string;
   closingDate?: string;
@@ -126,7 +128,9 @@ type JobPostingProps = {
     countryCode: string;
     postalCode?: string;
     streetAddress?: string;
-  };
+    /** Language of the rendered description; omitted when the site fell back to an untranslated source. */
+  inLanguage?: string | null;
+};
   workModeSlug: string;
   applicantCountries?: string[];
   url: string;
@@ -146,6 +150,7 @@ export function JobPostingJsonLd(props: JobPostingProps) {
     "@type": "JobPosting",
     title: props.title,
     description: props.description,
+    ...(props.inLanguage ? { inLanguage: props.inLanguage } : {}),
     identifier: {
       "@type": "PropertyValue",
       name: "CGIC",

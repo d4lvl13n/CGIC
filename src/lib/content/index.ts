@@ -1,9 +1,9 @@
 import { getFixtureArticles, getFixtureJobs } from "./fixtures";
 import type { Article, CmsImage, Job, Locale, Paginated, TaxonomyValue } from "./types";
-import { plainTextFromHtml, sanitizeCmsHtml } from "./sanitize";
+import { plainTextFromHtml, sanitizeCmsHtml, sanitizedHtmlFromMarkdown } from "./sanitize";
 import { isWordPressConfigured, wpFetch } from "@/lib/wordpress/client";
 import { wpContentItemSchema, wpContentListSchema, type WpContentItem, type WpTerm } from "@/lib/wordpress/schemas";
-import { isRecruitCrmConfigured, listRecruitCrmJobs } from "@/lib/recruitcrm/client";
+import { isRecruitCrmConfigured, jobCustomFieldValues, listInternalRecruitCrmJobs, listRecruitCrmJobs } from "@/lib/recruitcrm/client";
 import type { RecruitCrmJob } from "@/lib/recruitcrm/schemas";
 
 function todayInBrussels() {
@@ -98,7 +98,12 @@ function normalizeRecruitCrmJob(job: RecruitCrmJob, locale: Locale): Job {
   const labels = localizedJobLabels(locale);
   const jobType = Number(job.job_type) as 1 | 2 | 3 | 4;
   const locationType = Number(job.job_location_type) as 0 | 1 | 2;
-  const descriptionHtml = recruiterDescription(job);
+  // Translations live in RecruitCRM job custom fields as Markdown; fall back to the
+  // source description when this locale has not been translated yet. The source's
+  // language is recorded nowhere, so the fallback declines to assert one.
+  const translated = jobCustomFieldValues(job)[`description_${locale}`];
+  const descriptionHtml = translated ? sanitizedHtmlFromMarkdown(translated) : recruiterDescription(job);
+  const descriptionLocale: Locale | null = translated ? locale : null;
   const truncate = (value: string) => (value.length > 240 ? `${value.slice(0, 237).trimEnd()}…` : value);
   // summary feeds SEO meta descriptions, so it may fall back to the description;
   // teaser is candidate-facing card copy and only comes from note_for_candidates.
@@ -123,6 +128,7 @@ function normalizeRecruitCrmJob(job: RecruitCrmJob, locale: Locale): Job {
     summary,
     teaser,
     responsibilitiesHtml: descriptionHtml,
+    descriptionLocale,
     candidateProfileHtml: "",
     location: {
       id: stableNumber(`location:${locationLabel}`),
@@ -294,9 +300,45 @@ async function resolveAlternates(
   return Object.fromEntries(entries);
 }
 
+/**
+ * The public board endpoint returns only slug, name, city and description. Job code,
+ * skills, country, dates and the translation custom fields live exclusively on the
+ * authenticated record, so they are merged in by slug. Status fields are deliberately
+ * NOT merged: the public board is the authority on what is published, and the internal
+ * record's `enable_job_application_form` / `job_posting_status` would otherwise hide
+ * live jobs. If the authenticated index is unreachable the board still renders.
+ */
+async function internalJobsBySlug() {
+  try {
+    return new Map((await listInternalRecruitCrmJobs()).map((job) => [job.slug, job]));
+  } catch (cause) {
+    console.error("Could not enrich the job board with RecruitCRM metadata", cause);
+    return new Map<string, RecruitCrmJob>();
+  }
+}
+
+function withInternalMetadata(job: RecruitCrmJob, internal?: RecruitCrmJob): RecruitCrmJob {
+  if (!internal) return job;
+  return {
+    ...job,
+    job_code: job.job_code ?? internal.job_code,
+    job_skill: internal.job_skill,
+    job_category: internal.job_category,
+    country: internal.country,
+    city: job.city || internal.city,
+    job_location_type: internal.job_location_type ?? job.job_location_type,
+    created_on: internal.created_on,
+    updated_on: internal.updated_on,
+    custom_fields: internal.custom_fields,
+  };
+}
+
 export async function getJobs(locale: Locale): Promise<Job[]> {
   if (isRecruitCrmConfigured()) {
-    return (await listRecruitCrmJobs()).filter(isRecruitCrmJobPublic).map((job) => normalizeRecruitCrmJob(job, locale));
+    const [publicJobs, internal] = await Promise.all([listRecruitCrmJobs(), internalJobsBySlug()]);
+    return publicJobs
+      .filter(isRecruitCrmJobPublic)
+      .map((job) => normalizeRecruitCrmJob(withInternalMetadata(job, internal.get(job.slug)), locale));
   }
   return process.env.NODE_ENV === "production" && process.env.RECRUITCRM_USE_FIXTURES !== "true"
     ? []
