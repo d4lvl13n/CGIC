@@ -3,7 +3,7 @@ import type { Article, CmsImage, Job, Locale, Paginated, TaxonomyValue } from ".
 import { plainTextFromHtml, sanitizeCmsHtml, sanitizedHtmlFromMarkdown } from "./sanitize";
 import { isWordPressConfigured, wpFetch } from "@/lib/wordpress/client";
 import { wpContentItemSchema, wpContentListSchema, type WpContentItem, type WpTerm } from "@/lib/wordpress/schemas";
-import { isRecruitCrmConfigured, jobCustomFieldValues, listInternalRecruitCrmJobs, listRecruitCrmJobs } from "@/lib/recruitcrm/client";
+import { isRecruitCrmConfigured, jobTranslation, listInternalRecruitCrmJobs, listRecruitCrmJobs } from "@/lib/recruitcrm/client";
 import type { RecruitCrmJob } from "@/lib/recruitcrm/schemas";
 
 function todayInBrussels() {
@@ -101,7 +101,7 @@ function normalizeRecruitCrmJob(job: RecruitCrmJob, locale: Locale): Job {
   // Translations live in RecruitCRM job custom fields as Markdown; fall back to the
   // source description when this locale has not been translated yet. The source's
   // language is recorded nowhere, so the fallback declines to assert one.
-  const translated = jobCustomFieldValues(job)[`description_${locale}`];
+  const translated = jobTranslation(job, locale);
   const descriptionHtml = translated ? sanitizedHtmlFromMarkdown(translated) : recruiterDescription(job);
   const descriptionLocale: Locale | null = translated ? locale : null;
   const truncate = (value: string) => (value.length > 240 ? `${value.slice(0, 237).trimEnd()}…` : value);

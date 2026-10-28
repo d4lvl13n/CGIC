@@ -15,7 +15,17 @@ import { sanitizeSourceForTranslation } from "./sanitize";
  */
 
 const API_URL = "https://api.anthropic.com/v1/messages";
-const MODEL = "claude-sonnet-5";
+const MODEL = "claude-haiku-5-5";
+/** The model overshoots the length it is asked for, so it is asked for less than the field holds. */
+const PROMPT_LENGTH_TARGET = JOB_TRANSLATION_FIELD_MAX - 500;
+
+/** The translation was produced (and paid for) but cannot be stored. Retrying the same source will not help. */
+export class TranslationTooLongError extends Error {
+  constructor(public readonly length: number) {
+    super(`Translation is ${length} characters, over the ${JOB_TRANSLATION_FIELD_MAX} field limit`);
+    this.name = "TranslationTooLongError";
+  }
+}
 
 export const LANGUAGE_NAMES: Record<string, string> = {
   en: "English",
@@ -61,7 +71,7 @@ Output rules:
 - Keep the professional register of a recruitment advertisement. Do not add,
   remove, embellish or summarise anything — especially not contractual details such
   as contract type, seniority, salary, clearance requirements or location.
-- The result must be under ${JOB_TRANSLATION_FIELD_MAX} characters. If the source is
+- The result must be under ${PROMPT_LENGTH_TARGET} characters. If the source is
   long, translate faithfully but tightly rather than dropping sections.
 
 Job description:
@@ -86,7 +96,7 @@ export async function translateJobDescription(
     },
     body: JSON.stringify({
       model: MODEL,
-      max_tokens: 4000,
+      max_tokens: 8000,
       messages: [{ role: "user", content: prompt(language, source) }],
     }),
     cache: "no-store",
@@ -106,10 +116,9 @@ export async function translateJobDescription(
   if (!text) throw new Error("Translation returned no text");
 
   const escaped = escapeForCustomField(text);
-  if (escaped.length > JOB_TRANSLATION_FIELD_MAX) {
-    throw new Error(
-      `Translation is ${escaped.length} characters, over the ${JOB_TRANSLATION_FIELD_MAX} field limit`,
-    );
+  // A cut-off translation can still fit the field, so truncation counts as too long.
+  if (payload.stop_reason === "max_tokens" || escaped.length > JOB_TRANSLATION_FIELD_MAX) {
+    throw new TranslationTooLongError(escaped.length);
   }
   return escaped;
 }

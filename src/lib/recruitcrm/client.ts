@@ -165,6 +165,21 @@ export function jobCustomFieldValues(job: RecruitCrmJob) {
 }
 
 /**
+ * Stored in place of a translation that cannot fit the field. The translation cron
+ * treats any non-empty field as done, so this stops it paying for the same
+ * over-long translation on every run; clearing the field queues a retry.
+ */
+const TRANSLATION_SKIPPED_PREFIX = "[Auto-translation skipped";
+export const TRANSLATION_SKIPPED_NOTE =
+  `${TRANSLATION_SKIPPED_PREFIX}: the translated description exceeds the ${JOB_TRANSLATION_FIELD_MAX}-character field limit. Shorten the source description, then clear this field to retry.]`;
+
+/** The stored translation for a locale, or "" when it is missing or only the skipped note. */
+export function jobTranslation(job: RecruitCrmJob, locale: string) {
+  const value = jobCustomFieldValues(job)[`description_${locale}`] ?? "";
+  return value.startsWith(TRANSLATION_SKIPPED_PREFIX) ? "" : value;
+}
+
+/**
  * Writes one custom field. `POST /v1/jobs/{slug}` merges — verified by diffing all
  * 60 fields of a job before and after a partial write — so only the named field
  * changes.

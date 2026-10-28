@@ -5,9 +5,14 @@ import {
   jobCustomFieldValues,
   listInternalRecruitCrmJobs,
   listRecruitCrmJobCustomFields,
+  TRANSLATION_SKIPPED_NOTE,
   writeRecruitCrmJobCustomField,
 } from "@/lib/recruitcrm/client";
-import { isTranslationConfigured, translateJobDescription } from "@/lib/content/translate";
+import {
+  isTranslationConfigured,
+  translateJobDescription,
+  TranslationTooLongError,
+} from "@/lib/content/translate";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -24,6 +29,10 @@ const fieldNameFor = (locale: string) => `description_${locale}`;
  * A non-empty field is never overwritten, so a recruiter's correction survives every
  * subsequent run. To force a re-translation, clear the field in RecruitCRM and the
  * next run refills it.
+ *
+ * A translation too long for the field is replaced by TRANSLATION_SKIPPED_NOTE, which
+ * fills the field: without it the field stays empty and every run pays for the same
+ * translation again.
  */
 export async function GET(request: Request) {
   const secret = process.env.CRON_SECRET?.trim();
@@ -61,6 +70,7 @@ export async function GET(request: Request) {
 
   const written: string[] = [];
   const skipped: string[] = [];
+  const tooLong: string[] = [];
   const failed: { job: string; locale: string; error: string }[] = [];
 
   for (const job of jobs) {
@@ -86,16 +96,28 @@ export async function GET(request: Request) {
         continue;
       }
 
+      const fail = (cause: unknown) => failed.push({
+        job: job.slug,
+        locale,
+        error: cause instanceof Error ? cause.message : String(cause),
+      });
+
+      let value: string;
       try {
-        const markdown = await translateJobDescription(source, locale);
-        await writeRecruitCrmJobCustomField(job.slug, fieldIds.get(fieldName)!, markdown);
-        written.push(`${job.slug}:${locale}`);
+        value = await translateJobDescription(source, locale);
       } catch (cause) {
-        failed.push({
-          job: job.slug,
-          locale,
-          error: cause instanceof Error ? cause.message : String(cause),
-        });
+        if (!(cause instanceof TranslationTooLongError)) {
+          fail(cause);
+          continue;
+        }
+        value = TRANSLATION_SKIPPED_NOTE;
+      }
+
+      try {
+        await writeRecruitCrmJobCustomField(job.slug, fieldIds.get(fieldName)!, value);
+        (value === TRANSLATION_SKIPPED_NOTE ? tooLong : written).push(`${job.slug}:${locale}`);
+      } catch (cause) {
+        fail(cause);
       }
     }
   }
@@ -105,6 +127,7 @@ export async function GET(request: Request) {
     jobs: jobs.length,
     written: written.length,
     skipped: skipped.length,
+    tooLong,
     // Work is resumable: only empty fields are filled, so the next run continues.
     incomplete: budgetExhausted,
     failed,
